@@ -1,0 +1,85 @@
+{
+  "app": {
+    "signingConfigs": [
+      {
+        "name": "default",
+        "type": "HarmonyOS",
+        "material": {
+          "storeFile": "D:/key/qingmo/QingMo.p12",
+          "storePassword": "0000002007587D4390722B95FE206AA75BB9FD32C9A6323043E2AB6F8B9868A882BC354E11BF858F29D7A4AD8BA3B2BC",
+          "keyAlias": "markdownBox",
+          "keyPassword": "000000209C1C440FA67437B7AF3ABAA1ED3E9EB88C300D6D807A5792AA84CBF56E18571EEEC0DD5B1908E1BA001CF41B",
+          "signAlg": "SHA256withECDSA",
+          "profile": "D:/key/qingmo/testAPPDebug.p7b",
+          "certpath": "D:/key/qingmo/QingmoTest.cer"
+        }
+      },
+      {
+        "name": "QingMo",
+        "type": "HarmonyOS",
+        "material": {
+          "certpath": "D:/key/qingmo/QingMO_Cert.cer",
+          "keyAlias": "markdownBox",
+          "keyPassword": "000000200E90885A90F528B8B67936288CD91DED896799E6E527C80A7E68B392F22C3F3ADB898C7A1044E7016D0089AB",
+          "profile": "D:/key/qingmo/QingMoRelease.p7b",
+          "signAlg": "SHA256withECDSA",
+          "storeFile": "D:/key/qingmo/QingMo.p12",
+          "storePassword": "0000002014117A8419BCA2CF88AB7BDE621BFAB096DA14984F51EBD93035D5D3611F64367CB85480CB85CB853078CC9F"
+        }
+      }
+    ],
+    "products": [
+      {
+        "name": "default",
+        "signingConfig": "default",
+        "targetSdkVersion": "6.1.0(23)",
+        "compatibleSdkVersion": "6.1.0(23)",
+        "runtimeOS": "HarmonyOS",
+        "buildOption": {
+          "strictMode": {
+            "caseSensitiveCheck": true,
+            "useNormalizedOHMUrl": true
+          }
+        }
+      }
+    ],
+    "buildModeSet": [
+      {
+        "name": "debug",
+      },
+      {
+        "name": "release"
+      }
+    ]
+  },
+  "modules": [
+    {
+      "name": "entry",
+      "srcPath": "./entry",
+      "targets": [
+        {
+          "name": "default",
+          "applyToProducts": [
+            "default"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "common",
+      "srcPath": "./common",
+    },
+    {
+      "name": "mine",
+      "srcPath": "./feature/mine",
+    },
+    {
+      "name": "markdown",
+      "srcPath": "./feature/markdown",
+    },
+    {
+      "name": "star",
+      "srcPath": "./feature/star",
+    }
+  ]
+}

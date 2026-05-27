@@ -1,0 +1,48 @@
+# 依赖目录
+node_modules
+oh_modules
+
+# 构建产物
+**/build
+**/.preview
+*.hap
+*.app
+*.so
+*.abc
+
+# IDE 与工具配置
+.idea
+.vscode
+.clangd
+.clang-format
+.clang-tidy
+.cxx
+.hvigor
+.appanalyzer
+*.swp
+*.swo
+
+# 本地环境配置
+local.properties
+
+# AI 辅助工具配置
+.agents
+.trae
+.codegenie
+skills-lock.json
+
+# AGConnect 敏感配置
+agconnect-services.json
+
+# 临时文件与日志
+**/.test
+*.log
+报错.txt
+
+# 系统文件
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# DevEco Studio 默认模板项目（非主工程）
+MyApplication/
