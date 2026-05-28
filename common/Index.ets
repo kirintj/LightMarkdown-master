@@ -16,4 +16,3 @@ export { FileListCard } from './src/main/ets/component/FileListCard'
 
 export { GroupSheetContent, GroupItem } from './src/main/ets/component/GroupSheetContent'
 
-export { BreakpointManager } from './src/main/ets/util/BreakpointManager'

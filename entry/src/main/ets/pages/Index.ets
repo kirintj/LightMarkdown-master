@@ -8,15 +8,12 @@ import picker from '@ohos.file.picker';
 import { fileIo as fs } from '@kit.CoreFileKit';
 import { Star, StarredPage, GroupDetailPage, GroupListPage, RecentPage } from 'star';
 import { motion } from '@kit.MultimodalAwarenessKit';
-import { BreakpointManager } from 'common';
 @Entry
 @Component
 struct Index {
   @Provide('pathStack') pathStack: NavPathStack = new NavPathStack();
   private controller: HdsTabsController = new HdsTabsController();
   @StorageProp('safeBottom') safeBottom: number = 0
-  @StorageProp('currentBreakpoint') @Watch('onBreakpointChange') currentBreakpoint: string = 'sm';
-  private breakpointManager: BreakpointManager = BreakpointManager.getInstance();
   @State currentIndex: number = 0;
 
   @State s1: SymbolGlyphModifier = new SymbolGlyphModifier($r('sys.symbol.house_fill'));
@@ -36,15 +33,8 @@ struct Index {
   aboutToAppear(): void {
     this.onColorModeChange();
     this.controller.applyHideAnimation(HdsAnimationMode.CLICK_ANIMATION);
-    // 初始化断点管理器
-    const windowClass = AppStorage.get<window.Window>('windowClass') as window.Window;
-    this.breakpointManager.init(windowClass);
   }
 
-
-  onBreakpointChange(): void {
-    console.info('[Index] Breakpoint changed to: ' + this.currentBreakpoint);
-  }
 
   onColorModeChange(): void {
     // Get the current application window
@@ -107,16 +97,7 @@ struct Index {
   build() {
     HdsNavigation(this.pathStack) {
       Stack() {
-        if (this.breakpointManager.isPhone()) {
-          // 手机布局：单列
-          this.buildPhoneLayout()
-        } else if (this.breakpointManager.isFoldable()) {
-          // 折叠屏布局：可选双列
-          this.buildFoldableLayout()
-        } else {
-          // 平板布局：双栏或三栏
-          this.buildTabletLayout()
-        }
+        this.buildPhoneLayout()
       }
     }
     .mode(NavigationMode.Stack)
@@ -173,131 +154,6 @@ struct Index {
     .animationDuration(0)
   }
 
-  @Builder
-  buildFoldableLayout() {
-    Row() {
-      // 侧边栏（可收起）
-      Column() {
-        // 导航菜单
-      }
-      .width(this.currentBreakpoint === 'md' ? '30%' : '0%')
-      .height('100%')
-
-      // 内容区
-      Column() {
-        HdsTabs({ controller: this.controller }) {
-          TabContent() {
-            MdView()
-          }
-          .tabBar(new BottomTabBarStyle({
-            normal: this.s1,
-          }, '首页'))
-
-          TabContent() {
-            Star()
-          }
-          .tabBar(new BottomTabBarStyle({
-            normal: this.s2,
-          }, '速览'))
-
-          TabContent() {
-            Mine()
-          }
-          .tabBar(new BottomTabBarStyle({
-            normal: this.s3,
-          }, '我的'))
-        }
-        .barFloatingStyle({
-          barBottomMargin: this.safeBottom,
-          systemMaterialEffect: {
-            materialType: hdsMaterial.MaterialType.IMMERSIVE,
-            materialLevel: hdsMaterial.MaterialLevel.EXQUISITE
-          },
-          miniBar: {
-            miniBarBuilder: () => this.miniSearch(),
-            miniBarWidth: {
-              largeWidth: 56,
-              mediumWidth: 56,
-            }
-          },
-          adaptToHandedness: true
-        })
-        .barOverlap(true)
-        .barPosition(BarPosition.End)
-        .vertical(false)
-        .scrollable(false)
-        .backgroundColor(Color.Transparent)
-        .animationDuration(0)
-      }
-      .width(this.currentBreakpoint === 'md' ? '70%' : '100%')
-      .height('100%')
-    }
-    .width('100%')
-    .height('100%')
-  }
-
-  @Builder
-  buildTabletLayout() {
-    Row() {
-      // 侧边栏（常驻）
-      Column() {
-        // 导航菜单
-      }
-      .width('20%')
-      .height('100%')
-
-      // 内容区
-      Column() {
-        HdsTabs({ controller: this.controller }) {
-          TabContent() {
-            MdView()
-          }
-          .tabBar(new BottomTabBarStyle({
-            normal: this.s1,
-          }, '首页'))
-
-          TabContent() {
-            Star()
-          }
-          .tabBar(new BottomTabBarStyle({
-            normal: this.s2,
-          }, '速览'))
-
-          TabContent() {
-            Mine()
-          }
-          .tabBar(new BottomTabBarStyle({
-            normal: this.s3,
-          }, '我的'))
-        }
-        .barFloatingStyle({
-          barBottomMargin: this.safeBottom,
-          systemMaterialEffect: {
-            materialType: hdsMaterial.MaterialType.IMMERSIVE,
-            materialLevel: hdsMaterial.MaterialLevel.EXQUISITE
-          },
-          miniBar: {
-            miniBarBuilder: () => this.miniSearch(),
-            miniBarWidth: {
-              largeWidth: 56,
-              mediumWidth: 56,
-            }
-          },
-          adaptToHandedness: true
-        })
-        .barOverlap(true)
-        .barPosition(BarPosition.End)
-        .vertical(false)
-        .scrollable(false)
-        .backgroundColor(Color.Transparent)
-        .animationDuration(0)
-      }
-      .width('80%')
-      .height('100%')
-    }
-    .width('100%')
-    .height('100%')
-  }
   @Builder
   miniSearch() {
     Row() {
