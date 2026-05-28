@@ -1,23 +1,26 @@
 import { HdsNavDestination, HdsNavDestinationTitleMode, ScrollEffectType,
-  hdsMaterial} from "@kit.UIDesignKit";
+  hdsMaterial } from "@kit.UIDesignKit";
 import { ConfigurationConstant } from "@kit.AbilityKit";
-import { CardItem, BreakpointType, GlobalInfoModel, StorageKey } from "common";
+import { CardItem, BreakpointType, GlobalInfoModel, StorageKey, PageContext, PageEnum,
+  AccountService, UserAccount, AccountEvent } from "common";
 import { MdDbService, FileDataSource, MarkdownFile } from 'markdown';
 import { common } from '@kit.AbilityKit';
 import { fileIo as fs } from '@kit.CoreFileKit';
+import { emitter } from '@kit.BasicServicesKit';
 
 const TITLE_BAR_HEIGHT_FREE: number = 56;
 
 @Component
 export struct Mine {
+  scroller: Scroller = new Scroller();
   @State blankHeight: number = TITLE_BAR_HEIGHT_FREE;
   @StorageProp('safeTop') safeTop: number = 0
   @StorageProp('safeBottom') safeBottom: number = 0
   @StorageProp(StorageKey.GLOBAL_INFO) globalInfoModel: GlobalInfoModel =
     AppStorage.get<GlobalInfoModel>(StorageKey.GLOBAL_INFO) ?? new GlobalInfoModel();
-  @Consume('pathStack') pathStack: NavPathStack;
+  private pageContext: PageContext = AppStorage.get<PageContext>(StorageKey.HOME_PAGE_CONTEXT) ?? new PageContext();
   @Consume('dataSource') dataSource: FileDataSource;
-  @Consume('dataVersion') @Watch('onDataVersionChange') dataVersion: number;
+  @StorageLink('dataVersion') @Watch('onDataVersionChange') dataVersion: number = 0;
   @State titleMode: HdsNavDestinationTitleMode = HdsNavDestinationTitleMode.MINI;
   @StorageProp('currentColorMode') isDarkMode: number = ConfigurationConstant.ColorMode.COLOR_MODE_LIGHT;
 
@@ -26,12 +29,28 @@ export struct Mine {
   @State storageUsed: string = '计算中...';
   @State sortMode: number = 0;
   @State defaultViewIsGrid: boolean = false;
+  @State isLogin: boolean = false;
+  @State avatarUrl: string = '';
+  @State nickName: string = '';
   private context = this.getUIContext().getHostContext() as common.UIAbilityContext;
 
   async aboutToAppear(): Promise<void> {
     await this.loadStats();
     this.sortMode = AppStorage.get<number>('defaultSortMode') ?? 0;
     this.defaultViewIsGrid = AppStorage.get<boolean>('defaultViewIsGrid') ?? false;
+
+    // 监听登录事件
+    emitter.on(AccountEvent.BIND_MINE_LOGIN_EVENT, () => {
+      this.updateAccountData();
+    });
+
+    // 监听登出事件
+    emitter.on(AccountEvent.BIND_LOGOUT_EVENT, () => {
+      this.updateAccountData();
+    });
+
+    // 初始化账号状态
+    this.updateAccountData();
   }
 
   onDataVersionChange(): void {
@@ -78,78 +97,57 @@ export struct Mine {
     AppStorage.setOrCreate<boolean>('defaultViewIsGrid', isGrid);
   }
 
+  updateAccountData() {
+    const userInfo = AccountService.getInstance().getUserInfo();
+    if (userInfo) {
+      this.isLogin = true;
+      this.avatarUrl = userInfo.avatarUrl;
+      this.nickName = userInfo.nickname;
+    } else {
+      this.isLogin = false;
+      this.avatarUrl = '';
+      this.nickName = '';
+    }
+  }
+
+  handleLogin() {
+    const uiContext = this.getUIContext();
+    AccountService.getInstance().login(uiContext)
+      .then((userAccount) => {
+        this.avatarUrl = userAccount.avatarUrl;
+        this.nickName = userAccount.nickname;
+        AccountService.getInstance().selectHuaweiAccountToLogin();
+      })
+      .catch((error) => {
+        console.error('[Mine] Login failed:', JSON.stringify(error));
+      });
+  }
+
   build() {
+    this.ContentBuilder()
+  }
+
+  @Builder
+  ContentBuilder() {
     HdsNavDestination() {
       Stack({ alignContent: Alignment.TopStart }){
-        Scroll(){
+        Scroll(this.scroller){
           Column(){
             Blank().width('100%').height(this.blankHeight + this.safeTop)
-
-            // Stats card
-            Column() {
-              Row() {
-                Column() {
-                  Text(this.totalCount.toString())
-                    .fontSize(28)
-                    .fontWeight(FontWeight.Bold)
-                    .fontColor($r('sys.color.brand'))
-                  Text('文件总数')
-                    .fontSize(12)
-                    .fontColor($r('sys.color.font_secondary'))
-                    .margin({ top: 4 })
-                }
-                .layoutWeight(1)
-                .alignItems(HorizontalAlign.Center)
-
-                Column() {
-                  Text(this.groupCount.toString())
-                    .fontSize(28)
-                    .fontWeight(FontWeight.Bold)
-                    .fontColor($r('sys.color.confirm'))
-                  Text('分组数量')
-                    .fontSize(12)
-                    .fontColor($r('sys.color.font_secondary'))
-                    .margin({ top: 4 })
-                }
-                .layoutWeight(1)
-                .alignItems(HorizontalAlign.Center)
-
-                Column() {
-                  Text(this.storageUsed)
-                    .fontSize(28)
-                    .fontWeight(FontWeight.Bold)
-                    .fontColor($r('sys.color.alert'))
-                  Text('已用空间')
-                    .fontSize(12)
-                    .fontColor($r('sys.color.font_secondary'))
-                    .margin({ top: 4 })
-                }
-                .layoutWeight(1)
-                .alignItems(HorizontalAlign.Center)
-              }
-              .width('100%')
-              .padding(16)
-            }
-            .backgroundColor($r('sys.color.comp_background_primary'))
-            .borderRadius(16)
-            .padding(12)
-
-            // Settings section
-            Text('设置')
-              .fontSize(14)
-              .fontColor($r('sys.color.font_secondary'))
-              .width('100%')
-              .margin({ top: 20, bottom: 8 })
 
             List({ space: 0 }) {
               ListItemGroup() {
                 ListItem({ style: ListItemStyle.CARD }) {
                   Row() {
+                    SymbolGlyph($r('sys.symbol.text_and_arrow_down'))
+                      .fontSize($r('sys.float.Title_M'))
+                      .fontColor([$r('sys.color.icon_secondary')])
                     Text('默认排序方式')
-                      .fontSize(16)
-                      .fontWeight(500)
-                      .layoutWeight(1)
-                      .padding({ left: 16 })
+                      .fontSize($r('sys.float.Subtitle_M'))
+                      .fontWeight(FontWeight.Medium)
+                      .fontColor($r('sys.color.font_primary'))
+                      .margin({ left: $r('sys.float.padding_level8') })
+                    Blank()
                     Select([
                       { value: '名称' },
                       { value: '时间' },
@@ -167,11 +165,15 @@ export struct Mine {
 
                 ListItem({ style: ListItemStyle.CARD }) {
                   Row() {
-                    Text('默认视图模式')
-                      .fontSize(16)
-                      .fontWeight(500)
-                      .layoutWeight(1)
-                      .padding({ left: 16 })
+                    SymbolGlyph($r('sys.symbol.rectangle_3_group'))
+                      .fontSize($r('sys.float.Title_M'))
+                      .fontColor([$r('sys.color.icon_secondary')])
+                    Text('默认视图方式')
+                      .fontSize($r('sys.float.Subtitle_M'))
+                      .fontWeight(FontWeight.Medium)
+                      .fontColor($r('sys.color.font_primary'))
+                      .margin({ left: $r('sys.float.padding_level8') })
+                    Blank()
                     Select([
                       { value: '列表' },
                       { value: '网格' }
@@ -192,7 +194,7 @@ export struct Mine {
                     textContent: '深色模式',
                     symbolSrc: $r('sys.symbol.circle_filled_and_circle'),
                     onclick: () => {
-                      this.pathStack.pushPathByName('DarkModeSetting', 0)
+                      this.pageContext.openPage({ routerName: PageEnum.DARK_MODE_SETTING })
                     },
                   })
                 }
@@ -209,64 +211,46 @@ export struct Mine {
               .backgroundColor($r('sys.color.comp_background_primary'))
               .borderRadius($r('sys.float.corner_radius_level8'))
             }
+            .margin({bottom: 12})
             .height(undefined)
             .width('100%')
             .edgeEffect(EdgeEffect.Spring)
 
-            // Account section
-            Text('账户与同步')
-              .fontSize(14)
-              .fontColor($r('sys.color.font_secondary'))
-              .width('100%')
-              .margin({ top: 20, bottom: 8 })
-
             List({ space: 0 }) {
               ListItemGroup() {
                 ListItem({ style: ListItemStyle.CARD }) {
-                  CardItem({
-                    isShow: true,
-                    textContent: '登录 / 账号',
-                    symbolSrc: $r('sys.symbol.person'),
-                    onclick: () => {},
-                  })
-                }
-                .height(undefined)
-                .width('100%')
-
-                ListItem({ style: ListItemStyle.CARD }) {
-                  Row() {
-                    Text('云同步')
-                      .fontSize(16)
-                      .fontWeight(500)
-                      .layoutWeight(1)
-                      .padding({ left: 16 })
-                    Toggle({ type: ToggleType.Switch, isOn: false })
-                      .enabled(false)
-                      .margin({ right: 16 })
+                  if (this.isLogin) {
+                    Row() {
+                      if (this.avatarUrl) {
+                        Image(this.avatarUrl)
+                          .width(48)
+                          .height(48)
+                          .borderRadius(24)
+                      } else {
+                        Text(this.nickName.slice(-1))
+                          .width(48)
+                          .height(48)
+                          .borderRadius(24)
+                          .backgroundColor('#1890ff')
+                          .fontColor(Color.White)
+                          .fontSize(20)
+                          .textAlign(TextAlign.Center)
+                      }
+                      Text(this.nickName)
+                        .fontSize(16)
+                        .margin({ left: 12 })
+                    }
+                    .padding({ left: 16 })
+                  } else {
+                    CardItem({
+                      isShow: true,
+                      textContent: '登录 / 账号',
+                      symbolSrc: $r('sys.symbol.person'),
+                      onclick: () => {
+                        this.handleLogin();
+                      },
+                    })
                   }
-                  .height(56)
-                  .width('100%')
-                }
-                .height(undefined)
-
-                ListItem({ style: ListItemStyle.CARD }) {
-                  CardItem({
-                    isShow: true,
-                    textContent: '立即备份',
-                    symbolSrc: $r('sys.symbol.arrow_clockwise_circle_fill'),
-                    onclick: () => {},
-                  })
-                }
-                .height(undefined)
-                .width('100%')
-
-                ListItem({ style: ListItemStyle.CARD }) {
-                  CardItem({
-                    isShow: true,
-                    textContent: '恢复数据',
-                    symbolSrc: $r('sys.symbol.arrow_2_circlepath'),
-                    onclick: () => {},
-                  })
                 }
                 .height(undefined)
                 .width('100%')
@@ -281,16 +265,10 @@ export struct Mine {
               .backgroundColor($r('sys.color.comp_background_primary'))
               .borderRadius($r('sys.float.corner_radius_level8'))
             }
+            .margin({bottom: 12})
             .height(undefined)
             .width('100%')
             .edgeEffect(EdgeEffect.Spring)
-
-            // About section
-            Text('关于')
-              .fontSize(14)
-              .fontColor($r('sys.color.font_secondary'))
-              .width('100%')
-              .margin({ top: 20, bottom: 8 })
 
             List({ space: 0 }) {
               ListItemGroup() {
@@ -300,7 +278,7 @@ export struct Mine {
                     textContent: '关于轻Markdown',
                     symbolSrc: $r('sys.symbol.info_circle'),
                     onclick: () => {
-                      this.pathStack.pushPath({ name: 'AboutPage' });
+                      this.pageContext.openPage({ routerName: PageEnum.ABOUT_PAGE });
                     },
                   })
                 }
@@ -313,7 +291,7 @@ export struct Mine {
                     textContent: '使用指南',
                     symbolSrc: $r('sys.symbol.book'),
                     onclick: () => {
-                      this.pathStack.pushPath({ name: 'GuidePage' });
+                      this.pageContext.openPage({ routerName: PageEnum.GUIDE_PAGE });
                     },
                   })
                 }
@@ -326,19 +304,8 @@ export struct Mine {
                     textContent: '意见反馈',
                     symbolSrc: $r('sys.symbol.warning'),
                     onclick: () => {
-                      this.pathStack.pushPath({ name: 'FeedbackPage' });
+                      this.pageContext.openPage({ routerName: PageEnum.FEEDBACK_PAGE });
                     },
-                  })
-                }
-                .height(undefined)
-                .width('100%')
-
-                ListItem({ style: ListItemStyle.CARD }) {
-                  CardItem({
-                    isShow: true,
-                    textContent: '隐私政策',
-                    symbolSrc: $r('sys.symbol.lock_shield'),
-                    onclick: () => {},
                   })
                 }
                 .height(undefined)
