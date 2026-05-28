@@ -21,4 +21,15 @@ export { BreakpointType, BreakpointTypes } from './src/main/ets/util/BreakpointS
 
 export { WindowUtil } from './src/main/ets/util/WindowUtil'
 
-export { GlobalInfoModel, StorageKey } from './src/main/ets/model/GlobalInfoModel'
+export { GlobalInfoModel } from './src/main/ets/model/GlobalInfoModel'
+
+export { StorageKey } from './src/main/ets/constant/CommonEnums'
+export { PageContext, RouterParam } from './src/main/ets/routermanager/PageContext'
+export { PageEnum } from './src/main/ets/model/PageEnum'
+export { TabBarType, TabBarData, TABS_LIST } from './src/main/ets/model/TabBarModel'
+export { MarkdownViewerParams, GroupDetailParams } from './src/main/ets/model/RouterParams'
+export { HdsUtil } from './src/main/ets/util/HdsUtil'
+
+export { AccountService } from './src/main/ets/accountservice/AccountService'
+export { UserAccount } from './src/main/ets/accountservice/model/UserAccount'
+export { AccountEvent } from './src/main/ets/constant/CommonEnums'
