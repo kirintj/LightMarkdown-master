@@ -3,7 +3,7 @@ import { LengthMetrics, promptAction, SymbolGlyphModifier } from '@kit.ArkUI';
 import { FileGroup, MdDbService } from 'markdown';
 import { common } from '@kit.AbilityKit';
 import { HdsListItem, hdsMaterial, HdsNavDestinationTitleMode, IconStyleMode } from '@kit.UIDesignKit';
-import { EmptyState } from 'common';
+import { EmptyState, BreakpointType, GlobalInfoModel, StorageKey } from 'common';
 
 const TITLE_BAR_HEIGHT_FREE: number = 56 + 56 + 8;
 
@@ -15,6 +15,8 @@ export struct GroupListPage {
   @State blankHeight: number = TITLE_BAR_HEIGHT_FREE;
   @StorageProp('safeTop') safeTop: number = 0;
   @StorageProp('safeBottom') safeBottom: number = 0;
+  @StorageProp(StorageKey.GLOBAL_INFO) globalInfoModel: GlobalInfoModel =
+    AppStorage.get<GlobalInfoModel>(StorageKey.GLOBAL_INFO) ?? new GlobalInfoModel();
   @State groups: FileGroup[] = [];
   @State filteredGroups: FileGroup[] = [];
   @State searchKeyword: string = '';
@@ -187,7 +189,11 @@ export struct GroupListPage {
           this.applyFilter();
         });
     }
-    .padding({ left: 16, right: 16 });
+    .padding(new BreakpointType<Padding>({
+        sm: { left: 16, right: 16 },
+        md: { left: 24, right: 24 },
+        lg: { left: 32, right: 32 },
+      }).getValue(this.globalInfoModel.widthBreakpoint))
   }
 
   build(): void {
@@ -197,13 +203,21 @@ export struct GroupListPage {
           Scroll() {
             Column() {
               Blank().height(this.blankHeight + this.safeTop);
-              List({ space: 12 }) {
+              List({
+                space: new BreakpointType({
+                  sm: 12,
+                  md: 16,
+                  lg: 20,
+                }).getValue(this.globalInfoModel.widthBreakpoint)
+              }) {
                 ForEach(this.filteredGroups, (group: FileGroup) => {
                   HdsListItem({
                     hdsListItemCard: {
                       prefixItem: new PrefixCustomBuilder(() => {
                         this.listCard(group);
                       }),
+                      cardPrefixMargin:0,
+                      cardSuffixMargin:0,
                       cardHeight: 64,
                       onClick: () => {
                         this.pathStack.pushPath({ name: 'GroupDetail', param: group });
@@ -246,7 +260,11 @@ export struct GroupListPage {
           .justifyContent(FlexAlign.Center);
         }
       }
-      //.padding({ left: 16, right: 16 });
+      .padding(new BreakpointType<Padding>({
+        sm: { left: 16, right: 16 },
+        md: { left: 24, right: 24 },
+        lg: { left: 32, right: 32 },
+      }).getValue(this.globalInfoModel.widthBreakpoint))
     }
     .bindSheet(this.showCreateSheet, this.createGroupSheetBuilder(), {
       showClose: false,

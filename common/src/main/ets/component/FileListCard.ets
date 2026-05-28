@@ -43,7 +43,6 @@ export struct FileListCard {
         .onClick(() => { this.onStar(); });
     }
     .width('100%')
-    .padding($r('sys.float.padding_level6'))
     .onClick(() => { this.onTap(); });
   }
 }

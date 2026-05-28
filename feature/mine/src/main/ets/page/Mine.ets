@@ -1,7 +1,7 @@
 import { HdsNavDestination, HdsNavDestinationTitleMode, ScrollEffectType,
   hdsMaterial} from "@kit.UIDesignKit";
 import { ConfigurationConstant } from "@kit.AbilityKit";
-import { CardItem } from "common";
+import { CardItem, BreakpointType, GlobalInfoModel, StorageKey } from "common";
 import { MdDbService, FileDataSource, MarkdownFile } from 'markdown';
 import { common } from '@kit.AbilityKit';
 import { fileIo as fs } from '@kit.CoreFileKit';
@@ -13,6 +13,8 @@ export struct Mine {
   @State blankHeight: number = TITLE_BAR_HEIGHT_FREE;
   @StorageProp('safeTop') safeTop: number = 0
   @StorageProp('safeBottom') safeBottom: number = 0
+  @StorageProp(StorageKey.GLOBAL_INFO) globalInfoModel: GlobalInfoModel =
+    AppStorage.get<GlobalInfoModel>(StorageKey.GLOBAL_INFO) ?? new GlobalInfoModel();
   @Consume('pathStack') pathStack: NavPathStack;
   @Consume('dataSource') dataSource: FileDataSource;
   @Consume('dataVersion') @Watch('onDataVersionChange') dataVersion: number;
@@ -360,7 +362,11 @@ export struct Mine {
           }
           .width('100%')
           .constraintSize({ minHeight: '100%' })
-          .padding({ left: 16, right: 16 })
+          .padding(new BreakpointType<Padding>({
+            sm: { left: 16, right: 16 },
+            md: { left: 24, right: 24 },
+            lg: { left: 32, right: 32 },
+          }).getValue(this.globalInfoModel.widthBreakpoint))
         }
         .scrollBar(BarState.Off)
         .edgeEffect(EdgeEffect.Spring)

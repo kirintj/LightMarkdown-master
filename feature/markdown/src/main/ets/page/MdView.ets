@@ -13,7 +13,7 @@ import { systemShare, harmonyShare } from '@kit.ShareKit';
 import { uniformTypeDescriptor as utd } from '@kit.ArkData';
 import { BusinessError } from '@kit.BasicServicesKit';
 import { FloatBall } from '../component/FloatBall'
-import { FileListCard, GroupSheetContent, GroupItem, showDeleteConfirm, formatRelativeTime } from 'common';
+import { FileListCard, GroupSheetContent, GroupItem, showDeleteConfirm, formatRelativeTime, BreakpointType, GlobalInfoModel, StorageKey } from 'common';
 import { FileGridCard } from '../component/FileGridCard';
 const TITLE_BAR_HEIGHT_FREE: number = 56 + 56 + 8;
 
@@ -27,6 +27,8 @@ export struct MdView {
   @State titleMode: HdsNavDestinationTitleMode = HdsNavDestinationTitleMode.MINI;
   @StorageProp('safeTop') safeTop: number = 0;
   @StorageProp('safeBottom') safeBottom: number = 0;
+  @StorageProp(StorageKey.GLOBAL_INFO) globalInfoModel: GlobalInfoModel =
+    AppStorage.get<GlobalInfoModel>(StorageKey.GLOBAL_INFO) ?? new GlobalInfoModel();
   @Consume('dataSource') dataSource: FileDataSource;
   @Consume('dataVersion') @Watch('onDataVersionChange') dataVersion: number;
   @State searchKeyword: string = '';
@@ -175,7 +177,11 @@ export struct MdView {
           this.applySearchFilter();
         });
     }
-    .padding({ left: 16, right: 16 });
+    .padding(new BreakpointType<Padding>({
+      sm: { left: 16, right: 16 },
+      md: { left: 24, right: 24 },
+      lg: { left: 32, right: 32 },
+    }).getValue(this.globalInfoModel.widthBreakpoint))
   }
 
   aboutToAppear(): void {
@@ -617,6 +623,7 @@ export struct MdView {
     .subMenuExpandingMode(SubMenuExpandingMode.EMBEDDED_EXPAND)
     .subMenuExpandSymbol(this.expandSymbolModifier)
   }
+
   @Builder
   ContentBuilder(){
     HdsNavDestination() {
@@ -645,7 +652,14 @@ export struct MdView {
                 .justifyContent(FlexAlign.Center);
               } else if (this.searchKeyword) {
                 if (this.isGridView) {
-                  GridRow({ columns: 2, gutter: { x: 12, y: 12 } }) {
+                  GridRow({
+                    columns: new BreakpointType({
+                      sm: 2,
+                      md: 3,
+                      lg: 4,
+                    }).getValue(this.globalInfoModel.widthBreakpoint),
+                    gutter: { x: 12, y: 12 }
+                  }) {
                     ForEach(this.filteredFiles, (item: MarkdownFile) => {
                       GridCol() {
                         FileGridCard({
@@ -658,9 +672,14 @@ export struct MdView {
                     }, (item: MarkdownFile) => `${item.sandboxPath}_${item.isStar}_${item.groupName}`);
                   }
                   .width('100%')
-                  .padding({ left: 16, right: 16 });
                 } else {
-                  List({ space: 12 }) {
+                  List({
+                    space: new BreakpointType({
+                      sm: 12,
+                      md: 16,
+                      lg: 20,
+                    }).getValue(this.globalInfoModel.widthBreakpoint)
+                  }) {
                     ForEach(this.filteredFiles, (item: MarkdownFile) => {
                       ListItem() {
                         FileListCard({
@@ -684,13 +703,19 @@ export struct MdView {
                     }, (item: MarkdownFile) => `${item.sandboxPath}_${item.isStar}_${item.groupName}`);
                   }
                   .height(undefined)
-                  .padding({left:16, right:16})
                   .width('100%');
                 }
               } else if (this.isStarTab()) {
                 if (this.starredFiles.length > 0) {
                   if (this.isGridView) {
-                    GridRow({ columns: 2, gutter: { x: 12, y: 12 } }) {
+                    GridRow({
+                      columns: new BreakpointType({
+                        sm: 2,
+                        md: 3,
+                        lg: 4,
+                      }).getValue(this.globalInfoModel.widthBreakpoint),
+                      gutter: { x: 12, y: 12 }
+                    }) {
                       ForEach(this.starredFiles, (item: MarkdownFile) => {
                         GridCol() {
                           FileGridCard({
@@ -703,9 +728,14 @@ export struct MdView {
                       }, (item: MarkdownFile) => `${item.sandboxPath}_${item.isStar}_${item.groupName}`);
                     }
                     .width('100%')
-                    .padding({ left: 16, right: 16 });
                   } else {
-                    List({ space: 12 }) {
+                    List({
+                      space: new BreakpointType({
+                        sm: 12,
+                        md: 16,
+                        lg: 20,
+                      }).getValue(this.globalInfoModel.widthBreakpoint)
+                    }) {
                       ForEach(this.starredFiles, (item: MarkdownFile) => {
                         HdsListItem({
                           hdsListItemCard: {
@@ -713,6 +743,8 @@ export struct MdView {
                               this.listCard(item);
                             }),
                             cardHeight: 64,
+                            cardPrefixMargin:0,
+                            cardSuffixMargin:0,
                             onClick: () => {
                               this.pathStack.pushPath({ name: 'MarkdownViewer', param: item });
                             },
@@ -778,7 +810,14 @@ export struct MdView {
                 }
               } else {
                 if (this.isGridView) {
-                  GridRow({ columns: 2, gutter: { x: 12, y: 12 } }) {
+                  GridRow({
+                    columns: new BreakpointType({
+                      sm: 2,
+                      md: 3,
+                      lg: 4,
+                    }).getValue(this.globalInfoModel.widthBreakpoint),
+                    gutter: { x: 12, y: 12 }
+                  }) {
                     ForEach(this.allFiles, (item: MarkdownFile) => {
                       GridCol() {
                         FileGridCard({
@@ -791,9 +830,14 @@ export struct MdView {
                     }, (item: MarkdownFile) => `${item.sandboxPath}_${item.isStar}_${item.groupName}`);
                   }
                   .width('100%')
-                  .padding({ left: 16, right: 16 });
                 } else {
-                  List({ space: 12 }) {
+                  List({
+                    space: new BreakpointType({
+                      sm: 12,
+                      md: 16,
+                      lg: 20,
+                    }).getValue(this.globalInfoModel.widthBreakpoint)
+                  }) {
                     ForEach(this.allFiles, (item: MarkdownFile) => {
                       HdsListItem({
                         hdsListItemCard: {
@@ -801,6 +845,8 @@ export struct MdView {
                             this.listCard(item);
                           }),
                           cardHeight: 64,
+                          cardPrefixMargin:0,
+                          cardSuffixMargin:0,
                           onClick: () => {
                             this.pathStack.pushPath({ name: 'MarkdownViewer', param: item });
                           },
@@ -864,6 +910,11 @@ export struct MdView {
           EmptyView();
         }
       }
+      .padding(new BreakpointType<Padding>({
+        sm: { left: 16, right: 16 },
+        md: { left: 24, right: 24 },
+        lg: { left: 32, right: 32 },
+      }).getValue(this.globalInfoModel.widthBreakpoint))
     }
     .backgroundColor($r('sys.color.background_secondary'))
     .titleBar({

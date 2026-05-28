@@ -16,3 +16,9 @@ export { FileListCard } from './src/main/ets/component/FileListCard'
 
 export { GroupSheetContent, GroupItem } from './src/main/ets/component/GroupSheetContent'
 
+// 断点系统
+export { BreakpointType, BreakpointTypes } from './src/main/ets/util/BreakpointSystem'
+
+export { WindowUtil } from './src/main/ets/util/WindowUtil'
+
+export { GlobalInfoModel, StorageKey } from './src/main/ets/model/GlobalInfoModel'

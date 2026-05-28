@@ -46,3 +46,5 @@ Desktop.ini
 
 # DevEco Studio 默认模板项目（非主工程）
 MyApplication/
+docs/superpowers/breakpoint-system-guide.md
+docs/superpowers/specs/2026-05-27-breakpoint-system-design.md

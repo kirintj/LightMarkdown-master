@@ -1,6 +1,7 @@
-import { Configuration ,ConfigurationConstant, UIAbility } from '@kit.AbilityKit';
+import { Configuration, ConfigurationConstant, UIAbility } from '@kit.AbilityKit';
 import { hilog } from '@kit.PerformanceAnalysisKit';
 import { AppStorageV2, window } from '@kit.ArkUI';
+import { WindowUtil, GlobalInfoModel, StorageKey } from 'common';
 
 const DOMAIN = 0x0000;
 
@@ -29,7 +30,7 @@ export default class EntryAbility extends UIAbility {
         // TODO: Implement error handling.
       });
 
-      // 2. 获取并保存安全区域高度（用于后续避让）
+      // 保留现有安全区域逻辑（兼容旧代码）
       let topRectHeight = windowClass
         .getWindowAvoidArea(window.AvoidAreaType.TYPE_SYSTEM)
         .topRect.height;
@@ -38,7 +39,6 @@ export default class EntryAbility extends UIAbility {
         .bottomRect.height;
       AppStorage.setOrCreate('safeTop', px2vp(topRectHeight));
       AppStorage.setOrCreate('safeBottom', px2vp(bottomRectHeight));
-      AppStorage.setOrCreate('windowClass', windowClass);
       windowClass.on('avoidAreaChange', (data) => {
         if (data.type === window.AvoidAreaType.TYPE_SYSTEM) {
           AppStorage.setOrCreate('safeTop', px2vp(data.area.topRect.height));
@@ -54,6 +54,8 @@ export default class EntryAbility extends UIAbility {
         hilog.error(DOMAIN, 'testTag', 'Failed to load the content. Cause: %{public}s', JSON.stringify(err));
         return;
       }
+      // 初始化窗口工具（含断点监听）
+      WindowUtil.initialize(windowStage);
       hilog.info(DOMAIN, 'testTag', 'Succeeded in loading the content.');
     });
   }

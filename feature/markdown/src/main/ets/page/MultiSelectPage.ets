@@ -8,7 +8,8 @@ import { fileIo as fs, fileUri } from '@kit.CoreFileKit';
 import { systemShare } from '@kit.ShareKit';
 import { uniformTypeDescriptor as utd } from '@kit.ArkData';
 import { BusinessError } from '@kit.BasicServicesKit';
-import { FileListCard, GroupSheetContent, showDeleteConfirm, GroupItem } from 'common';
+import { FileListCard, GroupSheetContent, showDeleteConfirm, GroupItem, BreakpointType, StorageKey,
+  GlobalInfoModel } from 'common';
 import { BatchToolbar } from '../component/BatchToolbar';
 
 @Component
@@ -18,6 +19,8 @@ export struct MultiSelectPage {
   @Consume('dataVersion') dataVersion: number;
   @StorageProp('safeTop') safeTop: number = 0;
   @StorageProp('safeBottom') safeBottom: number = 0;
+  @StorageProp(StorageKey.GLOBAL_INFO) globalInfoModel: GlobalInfoModel =
+    AppStorage.get<GlobalInfoModel>(StorageKey.GLOBAL_INFO) ?? new GlobalInfoModel();
   @State allFiles: MarkdownFile[] = [];
   @State selectedPaths: string[] = [];
   @State showGroupSheet: boolean = false;
@@ -238,7 +241,11 @@ export struct MultiSelectPage {
       }
       .width('100%')
       .height(undefined)
-      .padding({ left: 16, right: 16 });
+      .padding(new BreakpointType<Padding>({
+        sm: { left: 16, right: 16 },
+        md: { left: 24, right: 24 },
+        lg: { left: 32, right: 32 },
+      }).getValue(this.globalInfoModel.widthBreakpoint))
     }
   }
 
@@ -357,7 +364,6 @@ export struct MultiSelectPage {
 
   build(): void {
     HdsNavDestination() {
-
         HdsTabs(){
           TabContent(){
             Stack({alignContent: Alignment.Bottom}) {

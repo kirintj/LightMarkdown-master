@@ -9,7 +9,7 @@ import { systemShare, harmonyShare } from '@kit.ShareKit';
 import { uniformTypeDescriptor as utd } from '@kit.ArkData';
 import { fileIo as fs, fileUri } from '@kit.CoreFileKit';
 import { RenameDialog } from '../component/RenameDialog';
-import { GroupSheetContent, GroupItem, showDeleteConfirm } from 'common';
+import { GroupSheetContent, GroupItem, showDeleteConfirm, BreakpointType, GlobalInfoModel, StorageKey } from 'common';
 import { FileActionBar } from '../component/FileActionBar';
 
 const TITLE_BAR_HEIGHT_FREE: number = 58 + 16 + 4;
@@ -48,6 +48,8 @@ export struct MarkdownViewerPage {
   private isShareListenerRegistered: boolean = false;
   private isDestroyed: boolean = false;
   @StorageProp('safeBottom') safeBottom: number = 0;
+  @StorageProp(StorageKey.GLOBAL_INFO) globalInfoModel: GlobalInfoModel =
+    AppStorage.get<GlobalInfoModel>(StorageKey.GLOBAL_INFO) ?? new GlobalInfoModel();
 
   aboutToAppear(): void {
     this.initMarkdownController();
@@ -354,7 +356,11 @@ export struct MarkdownViewerPage {
               .transition(TransitionEffect.OPACITY.animation({ duration: 300 }))
           }
         }
-      }.padding(16).width('100%');
+      }.padding(new BreakpointType<Padding>({
+        sm: { left: 16, right: 16, top: 16, bottom: 16 },
+        md: { left: 24, right: 24, top: 20, bottom: 20 },
+        lg: { left: 32, right: 32, top: 24, bottom: 24 },
+      }).getValue(this.globalInfoModel.widthBreakpoint)).width('100%');
     }
     .scrollBar(BarState.Off)
     .edgeEffect(EdgeEffect.Spring)

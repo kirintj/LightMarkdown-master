@@ -3,7 +3,7 @@ import { LengthMetrics, promptAction, SymbolGlyphModifier } from '@kit.ArkUI';
 import { MarkdownFile, FileDataSource, MdDbService } from 'markdown';
 import { common } from '@kit.AbilityKit';
 import { HdsListItem, hdsMaterial, HdsNavDestinationTitleMode } from '@kit.UIDesignKit';
-import { EmptyState, formatRelativeTime } from 'common';
+import { EmptyState, formatRelativeTime, BreakpointType, GlobalInfoModel, StorageKey } from 'common';
 
 const TITLE_BAR_HEIGHT_FREE: number = 56 + 56 + 8;
 
@@ -16,6 +16,8 @@ export struct RecentPage {
   @State blankHeight: number = TITLE_BAR_HEIGHT_FREE;
   @StorageProp('safeTop') safeTop: number = 0;
   @StorageProp('safeBottom') safeBottom: number = 0;
+  @StorageProp(StorageKey.GLOBAL_INFO) globalInfoModel: GlobalInfoModel =
+    AppStorage.get<GlobalInfoModel>(StorageKey.GLOBAL_INFO) ?? new GlobalInfoModel();
   @State allFiles: MarkdownFile[] = [];
   @State filteredFiles: MarkdownFile[] = [];
   @State searchKeyword: string = '';
@@ -112,7 +114,11 @@ export struct RecentPage {
           this.applyFilter();
         });
     }
-    .padding({ left: 16, right: 16 });
+    .padding(new BreakpointType<Padding>({
+        sm: { left: 16, right: 16 },
+        md: { left: 24, right: 24 },
+        lg: { left: 32, right: 32 },
+      }).getValue(this.globalInfoModel.widthBreakpoint))
   }
 
   build(): void {
@@ -122,7 +128,13 @@ export struct RecentPage {
           Scroll(this.scroller) {
             Column() {
               Blank().height(this.blankHeight + this.safeTop);
-              List({ space: 12 }) {
+              List({
+                space: new BreakpointType({
+                  sm: 12,
+                  md: 16,
+                  lg: 20,
+                }).getValue(this.globalInfoModel.widthBreakpoint)
+              }) {
                 ForEach(this.filteredFiles, (item: MarkdownFile) => {
                   HdsListItem({
                     hdsListItemCard: {
@@ -130,6 +142,8 @@ export struct RecentPage {
                         this.listCard(item);
                       }),
                       cardHeight: 64,
+                      cardPrefixMargin:0,
+                      cardSuffixMargin:0,
                       onClick: () => {
                         this.pathStack.pushPath({ name: 'MarkdownViewer', param: item });
                       },

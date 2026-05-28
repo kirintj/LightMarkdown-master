@@ -1,10 +1,12 @@
 import { HdsNavDestination, ScrollEffectType, hdsMaterial } from '@kit.UIDesignKit';
+import { BreakpointType, GlobalInfoModel, StorageKey } from 'common';
 
 @Component
 export struct GuidePage {
   @StorageProp('safeTop') safeTop: number = 0;
   @StorageProp('safeBottom') safeBottom: number = 0;
-
+  @StorageProp(StorageKey.GLOBAL_INFO) globalInfoModel: GlobalInfoModel =
+    AppStorage.get<GlobalInfoModel>(StorageKey.GLOBAL_INFO) ?? new GlobalInfoModel();
   @Builder
   section(title: string, content: string) {
     Column() {
@@ -74,7 +76,11 @@ export struct GuidePage {
           Blank().height(this.safeBottom + 16)
         }
         .width('100%')
-        .padding({ left: 16, right: 16 })
+        .padding(new BreakpointType<Padding>({
+          sm: { left: 16, right: 16 },
+          md: { left: 24, right: 24 },
+          lg: { left: 32, right: 32 },
+        }).getValue(this.globalInfoModel.widthBreakpoint))
       }
       .scrollBar(BarState.Auto)
       .edgeEffect(EdgeEffect.Spring)

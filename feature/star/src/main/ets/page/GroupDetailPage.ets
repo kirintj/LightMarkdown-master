@@ -3,7 +3,7 @@ import { LengthMetrics, promptAction, SymbolGlyphModifier } from '@kit.ArkUI';
 import { MarkdownFile, FileDataSource, FileGroup, MdDbService } from 'markdown';
 import { common } from '@kit.AbilityKit';
 import { HdsListItem, hdsMaterial, HdsNavDestinationTitleMode, IconStyleMode } from '@kit.UIDesignKit';
-import { EmptyState, showDeleteConfirm } from 'common';
+import { EmptyState, showDeleteConfirm, BreakpointType, GlobalInfoModel, StorageKey } from 'common';
 const TITLE_BAR_HEIGHT_FREE: number = 56 + 56 + 8;
 
 @Component
@@ -15,6 +15,8 @@ export struct GroupDetailPage {
   @State blankHeight: number = TITLE_BAR_HEIGHT_FREE;
   @StorageProp('safeTop') safeTop: number = 0;
   @StorageProp('safeBottom') safeBottom: number = 0;
+  @StorageProp(StorageKey.GLOBAL_INFO) globalInfoModel: GlobalInfoModel =
+    AppStorage.get<GlobalInfoModel>(StorageKey.GLOBAL_INFO) ?? new GlobalInfoModel();
   groupData: FileGroup = new FileGroup(-1, '未命名分组');
   @State allFiles: MarkdownFile[] = [];
   @State filteredFiles: MarkdownFile[] = [];
@@ -161,6 +163,8 @@ export struct GroupDetailPage {
                         this.candidateFileCard(file);
                       }),
                       cardHeight: 64,
+                      cardPrefixMargin:0,
+                      cardSuffixMargin:0,
                       onClick: () => {
                         this.addFileToGroup(file);
                       },
@@ -278,7 +282,13 @@ export struct GroupDetailPage {
           Scroll() {
             Column() {
               Blank().height(this.blankHeight + this.safeTop);
-              List({ space: 12 }) {
+              List({
+                space: new BreakpointType({
+                  sm: 12,
+                  md: 16,
+                  lg: 20,
+                }).getValue(this.globalInfoModel.widthBreakpoint)
+              }) {
                 ForEach(this.filteredFiles, (item: MarkdownFile) => {
                   HdsListItem({
                     hdsListItemCard: {
@@ -286,6 +296,8 @@ export struct GroupDetailPage {
                         this.listCard(item);
                       }),
                       cardHeight: 64,
+                      cardPrefixMargin:0,
+                      cardSuffixMargin:0,
                       onClick: () => {
                         this.pathStack.pushPath({ name: 'MarkdownViewer', param: item });
                       },

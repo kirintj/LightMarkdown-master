@@ -1,10 +1,13 @@
 import { HdsNavDestination, ScrollEffectType, hdsMaterial } from '@kit.UIDesignKit';
 import { common, Want } from '@kit.AbilityKit';
+import { BreakpointType, GlobalInfoModel, StorageKey } from 'common';
 
 @Component
 export struct FeedbackPage {
   @StorageProp('safeTop') safeTop: number = 0;
   @StorageProp('safeBottom') safeBottom: number = 0;
+  @StorageProp(StorageKey.GLOBAL_INFO) globalInfoModel: GlobalInfoModel =
+    AppStorage.get<GlobalInfoModel>(StorageKey.GLOBAL_INFO) ?? new GlobalInfoModel();
   private context = this.getUIContext().getHostContext() as common.UIAbilityContext;
 
   private async openEmail(): Promise<void> {
@@ -121,7 +124,11 @@ export struct FeedbackPage {
           Blank().height(this.safeBottom + 16)
         }
         .width('100%')
-        .padding({ left: 16, right: 16 })
+        .padding(new BreakpointType<Padding>({
+          sm: { left: 16, right: 16 },
+          md: { left: 24, right: 24 },
+          lg: { left: 32, right: 32 },
+        }).getValue(this.globalInfoModel.widthBreakpoint))
       }
       .scrollBar(BarState.Auto)
       .edgeEffect(EdgeEffect.Spring)

@@ -5,6 +5,7 @@ import { common, ConfigurationConstant } from "@kit.AbilityKit";
 import { promptAction } from "@kit.ArkUI";
 import { CardItem } from '../component/CardItem'
 import { McBarChart, McPieChart, Options } from '@mcui/mccharts'
+import { BreakpointType, GlobalInfoModel, StorageKey } from "common";
 
 const TITLE_BAR_HEIGHT_FREE = 56
 
@@ -21,7 +22,9 @@ class PieDataItem {
 export struct Star {
   @State blankHeight: number = TITLE_BAR_HEIGHT_FREE;
   @StorageProp('safeTop') safeTop: number = 0
-  @StorageProp('safeBottom') safeBottom: number = 0
+  @StorageProp('safeBottom') safeBottom: number = 0;
+  @StorageProp(StorageKey.GLOBAL_INFO) globalInfoModel: GlobalInfoModel =
+    AppStorage.get<GlobalInfoModel>(StorageKey.GLOBAL_INFO) ?? new GlobalInfoModel();
   @Consume('pathStack') pathStack: NavPathStack;
   @State titleMode: HdsNavDestinationTitleMode = HdsNavDestinationTitleMode.MINI;
   @Consume('dataSource') dataSource: FileDataSource;
@@ -385,7 +388,11 @@ export struct Star {
           }
           Blank().height(56 + this.safeBottom + 8)
         }
-        .padding({ left: 16, right: 16 })
+        .padding(new BreakpointType<Padding>({
+          sm: { left: 16, right: 16 },
+          md: { left: 24, right: 24 },
+          lg: { left: 32, right: 32 },
+        }).getValue(this.globalInfoModel.widthBreakpoint))
         .width('100%')
         .alignItems(HorizontalAlign.Center)
         .constraintSize({ minHeight: '100%' })

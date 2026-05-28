@@ -1,6 +1,7 @@
 import { common } from '@kit.AbilityKit';
 import { setDarkColorMode, setLightColorMode, setAutoColorMode } from '../utils/ColorModeChangeFunctions';
 import { hdsMaterial, HdsNavDestination, ScrollEffectType } from '@kit.UIDesignKit';
+import { BreakpointType, GlobalInfoModel, StorageKey } from 'common';
 
 @Component
 export struct DarkModeSetting {
@@ -15,7 +16,8 @@ export struct DarkModeSetting {
   }
   @StorageProp('safeTop') safeTop: number = 0
   @StorageProp('safeBottom') safeBottom: number = 0
-
+  @StorageProp(StorageKey.GLOBAL_INFO) globalInfoModel: GlobalInfoModel =
+    AppStorage.get<GlobalInfoModel>(StorageKey.GLOBAL_INFO) ?? new GlobalInfoModel();
   build() {
     HdsNavDestination() {
       Scroll(){
@@ -87,7 +89,11 @@ export struct DarkModeSetting {
           .borderRadius($r('sys.float.corner_radius_level8'))
           Blank().height(this.safeBottom)
         }
-        .padding({ left: 16, right: 16 })
+        .padding(new BreakpointType<Padding>({
+          sm: { left: 16, right: 16 },
+          md: { left: 24, right: 24 },
+          lg: { left: 32, right: 32 },
+        }).getValue(this.globalInfoModel.widthBreakpoint))
         .constraintSize({ minHeight: '100%' })
       }
       .scrollBar(BarState.Auto)

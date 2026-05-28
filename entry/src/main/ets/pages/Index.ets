@@ -38,7 +38,8 @@ struct Index {
 
   onColorModeChange(): void {
     // Get the current application window
-    let windowClass = AppStorage.get<window.Window>('windowClass') as window.Window;
+    let windowClass = AppStorage.get<window.Window>('windowClass');
+    if (!windowClass) return;
     if (this.currentColorMode === ConfigurationConstant.ColorMode.COLOR_MODE_LIGHT) {
       // Currently in light color mode
       //Set the font to black
