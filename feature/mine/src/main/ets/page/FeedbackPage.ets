@@ -49,29 +49,21 @@ export struct FeedbackPage {
               SymbolGlyph($r('sys.symbol.envelope_fill'))
                 .fontSize(24)
                 .fontColor([$r('sys.color.brand')])
-              Column() {
-                Text('邮件反馈')
-                  .fontSize(16)
-                  .fontWeight(500)
-                  .fontColor($r('sys.color.font_primary'))
-                Text('通过邮件发送详细反馈')
-                  .fontSize(12)
-                  .fontColor($r('sys.color.font_secondary'))
-                  .margin({ top: 4 })
-              }
-              .alignItems(HorizontalAlign.Start)
-              .margin({ left: 12 })
-              .layoutWeight(1)
-              SymbolGlyph($r('sys.symbol.chevron_forward'))
-                .fontSize(14)
-                .fontColor([$r('sys.color.font_tertiary')])
+              Text('邮件反馈')
+                .fontSize($r('sys.float.Subtitle_M'))
+                .fontWeight(FontWeight.Medium)
+                .fontColor($r('sys.color.font_primary'))
+                .margin({ left: $r('sys.float.padding_level8') })
+              Blank()
+              Text('2896651097@qq.com')
+                .fontSize($r('sys.float.Title_S'))
+                .fontColor($r('sys.color.icon_fourth'))
             }
             .width('100%')
             .height(64)
             .padding({ left: 16, right: 16 })
             .backgroundColor($r('sys.color.comp_background_primary'))
             .borderRadius(16)
-            .onClick(() => { this.openEmail(); })
           }
           .width('100%')
           .margin({ bottom: 12 })
@@ -82,22 +74,11 @@ export struct FeedbackPage {
               SymbolGlyph($r('sys.symbol.questionmark_circle_fill'))
                 .fontSize(24)
                 .fontColor([$r('sys.color.confirm')])
-              Column() {
-                Text('常见问题')
-                  .fontSize(16)
-                  .fontWeight(500)
-                  .fontColor($r('sys.color.font_primary'))
-                Text('查看常见问题解答')
-                  .fontSize(12)
-                  .fontColor($r('sys.color.font_secondary'))
-                  .margin({ top: 4 })
-              }
-              .alignItems(HorizontalAlign.Start)
-              .margin({ left: 12 })
-              .layoutWeight(1)
-              SymbolGlyph($r('sys.symbol.chevron_forward'))
-                .fontSize(14)
-                .fontColor([$r('sys.color.font_tertiary')])
+              Text('常见问题')
+                .fontSize($r('sys.float.Subtitle_M'))
+                .fontWeight(FontWeight.Medium)
+                .fontColor($r('sys.color.font_primary'))
+                .margin({ left: $r('sys.float.padding_level8') })
             }
             .width('100%')
             .height(64)
@@ -110,18 +91,6 @@ export struct FeedbackPage {
           }
           .width('100%')
           .margin({ bottom: 12 })
-
-          // 版本信息
-          Column() {
-            Text('当前版本：v1.0.2')
-              .fontSize(12)
-              .fontColor($r('sys.color.font_tertiary'))
-          }
-          .width('100%')
-          .margin({ top: 32 })
-          .alignItems(HorizontalAlign.Center)
-
-          Blank().height(this.safeBottom + 16)
         }
         .width('100%')
         .padding(new BreakpointType<Padding>({

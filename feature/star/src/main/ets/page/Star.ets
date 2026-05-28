@@ -5,7 +5,7 @@ import { common, ConfigurationConstant } from "@kit.AbilityKit";
 import { promptAction } from "@kit.ArkUI";
 import { CardItem } from '../component/CardItem'
 import { McBarChart, McPieChart, Options } from '@mcui/mccharts'
-import { BreakpointType, GlobalInfoModel, StorageKey } from "common";
+import { BreakpointType, GlobalInfoModel, StorageKey, PageContext, PageEnum } from "common";
 
 const TITLE_BAR_HEIGHT_FREE = 56
 
@@ -20,15 +20,16 @@ class PieDataItem {
 
 @Component
 export struct Star {
+  scroller: Scroller = new Scroller();
   @State blankHeight: number = TITLE_BAR_HEIGHT_FREE;
   @StorageProp('safeTop') safeTop: number = 0
   @StorageProp('safeBottom') safeBottom: number = 0;
   @StorageProp(StorageKey.GLOBAL_INFO) globalInfoModel: GlobalInfoModel =
     AppStorage.get<GlobalInfoModel>(StorageKey.GLOBAL_INFO) ?? new GlobalInfoModel();
-  @Consume('pathStack') pathStack: NavPathStack;
+  private pageContext: PageContext = AppStorage.get<PageContext>(StorageKey.HOME_PAGE_CONTEXT) ?? new PageContext();
   @State titleMode: HdsNavDestinationTitleMode = HdsNavDestinationTitleMode.MINI;
   @Consume('dataSource') dataSource: FileDataSource;
-  @Consume('dataVersion') @Watch('onDataVersionChange') dataVersion: number;
+  @StorageLink('dataVersion') @Watch('onDataVersionChange') dataVersion: number = 0;
   @StorageProp('currentColorMode') @Watch('onChartColorModeChange') currentColorMode: number =
     ConfigurationConstant.ColorMode.COLOR_MODE_LIGHT;
   @State starCount: number = 0;
@@ -41,7 +42,6 @@ export struct Star {
   @State showCreateGroupSheet: boolean = false;
   @State newGroupName: string = '';
   @State columns: number = 2;
-  private scroller: Scroller = new Scroller();
   @State overviewOption: Options = new Options({
     title: { show: false },
     legend: { show: false },
@@ -272,7 +272,7 @@ export struct Star {
     .backgroundColor($r('sys.color.comp_background_primary'))
     .borderRadius(16)
     .onClick(() => {
-      this.pathStack.pushPath({ name: 'GroupDetail', param: group });
+      this.pageContext.openPage({ routerName: PageEnum.GROUP_DETAIL_PAGE, param: group });
     })
   }
 
@@ -305,6 +305,11 @@ export struct Star {
   }
 
   build() {
+    this.ContentBuilder()
+  }
+
+  @Builder
+  ContentBuilder() {
     HdsNavDestination() {
       Scroll(this.scroller) {
         Column() {
@@ -328,7 +333,7 @@ export struct Star {
                 bgcolor: $r('sys.color.alert')
               })
                 .onClick(() => {
-                  this.pathStack.pushPath({ name: 'Recent' });
+                  this.pageContext.openPage({ routerName: PageEnum.RECENT_PAGE });
                 })
             }
             GridItem() {
@@ -340,7 +345,7 @@ export struct Star {
                 bgcolor: '#FFC83D',
               })
                 .onClick(() => {
-                  this.pathStack.pushPath({ name: 'Starred' });
+                  this.pageContext.openPage({ routerName: PageEnum.STARRED_PAGE });
                 })
             }
             GridItem() {
@@ -352,7 +357,7 @@ export struct Star {
                 bgcolor: $r('sys.color.confirm')
               })
                 .onClick(() => {
-                  this.pathStack.pushPath({ name: 'GroupList' });
+                  this.pageContext.openPage({ routerName: PageEnum.GROUP_LIST_PAGE });
                 })
             }
           }

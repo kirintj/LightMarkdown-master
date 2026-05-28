@@ -3,7 +3,6 @@ import { LengthMetrics, promptAction, SymbolGlyphModifier } from '@kit.ArkUI';
 import { picker } from '@kit.CoreFileKit';
 import { fileIo as fs, fileUri } from '@kit.CoreFileKit';
 import { MarkdownFile, FileGroup, FileDataSource } from '../class/MarkdownFile';
-import { MarkdownViewerPage } from './MarkdownViewerPage';
 import { common } from '@kit.AbilityKit';
 import { hdsEffect, HdsListItem, hdsMaterial } from '@kit.UIDesignKit';
 import { EmptyView } from '../component/EmptyComponent';
@@ -13,14 +12,13 @@ import { systemShare, harmonyShare } from '@kit.ShareKit';
 import { uniformTypeDescriptor as utd } from '@kit.ArkData';
 import { BusinessError } from '@kit.BasicServicesKit';
 import { FloatBall } from '../component/FloatBall'
-import { GroupSheetContent, GroupItem, showDeleteConfirm, formatRelativeTime, BreakpointType, GlobalInfoModel, StorageKey } from 'common';
+import { GroupSheetContent, GroupItem, showDeleteConfirm, formatRelativeTime, BreakpointType, GlobalInfoModel, StorageKey, PageContext, PageEnum } from 'common';
 import { FileGridCard } from '../component/FileGridCard';
 const TITLE_BAR_HEIGHT_FREE: number = 56 + 56 + 8;
 
 @Component
 export struct MdView {
-  @Provide('pageInfos') pageInfos: NavPathStack = new NavPathStack();
-  @Consume('pathStack') pathStack: NavPathStack;
+  private pageContext: PageContext = AppStorage.get<PageContext>(StorageKey.HOME_PAGE_CONTEXT) ?? new PageContext();
   scroller: Scroller = new Scroller();
   @State blankHeight: number = TITLE_BAR_HEIGHT_FREE;
   @State isHideBackButton: boolean = false;
@@ -30,7 +28,7 @@ export struct MdView {
   @StorageProp(StorageKey.GLOBAL_INFO) globalInfoModel: GlobalInfoModel =
     AppStorage.get<GlobalInfoModel>(StorageKey.GLOBAL_INFO) ?? new GlobalInfoModel();
   @Consume('dataSource') dataSource: FileDataSource;
-  @Consume('dataVersion') @Watch('onDataVersionChange') dataVersion: number;
+  @StorageLink('dataVersion') @Watch('onDataVersionChange') dataVersion: number = 0;
   @State searchKeyword: string = '';
   @State filteredFiles: MarkdownFile[] = [];
   private context = this.getUIContext().getHostContext() as common.UIAbilityContext;
@@ -389,13 +387,6 @@ export struct MdView {
     }
   }
 
-  @Builder
-  PageMap(name: string, param: object): void {
-    if (name === 'MarkdownViewer') {
-      MarkdownViewerPage({ fileData: param as MarkdownFile });
-    }
-  }
-
   private async toggleStar(item: MarkdownFile): Promise<void> {
     try {
       const dbService = MdDbService.getInstance(this.context);
@@ -583,7 +574,7 @@ export struct MdView {
       })
         .onChange(() => {
           this.menuVisible = false;
-          this.pathStack.pushPath({ name: 'MultiSelect' });
+          this.pageContext.openPage({ routerName: PageEnum.MULTI_SELECT_PAGE });
         })
     }
     .width(200)
@@ -612,7 +603,7 @@ export struct MdView {
             onDisappear: () => { this.menuVisible = false; }
           })
         if (this.allFiles.length > 0) {
-          Scroll() {
+          Scroll(this.scroller) {
             Column() {
               Blank().height(this.blankHeight + this.safeTop);
               if (this.searchKeyword && this.filteredFiles.length === 0) {
@@ -638,7 +629,7 @@ export struct MdView {
                       GridCol() {
                         FileGridCard({
                           file: item,
-                          onTap: () => { this.pathStack.pushPath({ name: 'MarkdownViewer', param: item }); },
+                          onTap: () => { this.pageContext.openPage({ routerName: PageEnum.MARKDOWN_VIEWER, param: item }); },
                           onStar: () => { this.toggleStar(item); },
                           controller: this.controller
                         })
@@ -664,7 +655,7 @@ export struct MdView {
                           cardPrefixMargin:0,
                           cardSuffixMargin:0,
                           onClick: () => {
-                            this.pathStack.pushPath({ name: 'MarkdownViewer', param: item });
+                            this.pageContext.openPage({ routerName: PageEnum.MARKDOWN_VIEWER, param: item });
                           },
                         },
                         swipeActionOptions: {
@@ -727,7 +718,7 @@ export struct MdView {
                         GridCol() {
                           FileGridCard({
                             file: item,
-                            onTap: () => { this.pathStack.pushPath({ name: 'MarkdownViewer', param: item }); },
+                            onTap: () => { this.pageContext.openPage({ routerName: PageEnum.MARKDOWN_VIEWER, param: item }); },
                             onStar: () => { this.toggleStar(item); },
                             controller: this.controller
                           })
@@ -753,7 +744,7 @@ export struct MdView {
                             cardPrefixMargin:0,
                             cardSuffixMargin:0,
                             onClick: () => {
-                              this.pathStack.pushPath({ name: 'MarkdownViewer', param: item });
+                              this.pageContext.openPage({ routerName: PageEnum.MARKDOWN_VIEWER, param: item });
                             },
                           },
                           swipeActionOptions: {
@@ -829,7 +820,7 @@ export struct MdView {
                       GridCol() {
                         FileGridCard({
                           file: item,
-                          onTap: () => { this.pathStack.pushPath({ name: 'MarkdownViewer', param: item }); },
+                          onTap: () => { this.pageContext.openPage({ routerName: PageEnum.MARKDOWN_VIEWER, param: item }); },
                           onStar: () => { this.toggleStar(item); },
                           controller: this.controller
                         })
@@ -855,7 +846,7 @@ export struct MdView {
                           cardPrefixMargin:0,
                           cardSuffixMargin:0,
                           onClick: () => {
-                            this.pathStack.pushPath({ name: 'MarkdownViewer', param: item });
+                            this.pageContext.openPage({ routerName: PageEnum.MARKDOWN_VIEWER, param: item });
                           },
                         },
                         swipeActionOptions: {
@@ -998,7 +989,7 @@ export struct MdView {
 
   }
   build(): void {
-      this.ContentBuilder()
+    this.ContentBuilder()
   }
 }
 

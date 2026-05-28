@@ -3,14 +3,14 @@ import { LengthMetrics, promptAction, SymbolGlyphModifier } from '@kit.ArkUI';
 import { FileGroup, MdDbService } from 'markdown';
 import { common } from '@kit.AbilityKit';
 import { HdsListItem, hdsMaterial, HdsNavDestinationTitleMode, IconStyleMode } from '@kit.UIDesignKit';
-import { EmptyState, BreakpointType, GlobalInfoModel, StorageKey } from 'common';
+import { EmptyState, BreakpointType, GlobalInfoModel, StorageKey, PageContext, PageEnum } from 'common';
 
 const TITLE_BAR_HEIGHT_FREE: number = 56 + 56 + 8;
 
 @Component
 export struct GroupListPage {
-  @Consume('pathStack') pathStack: NavPathStack;
-  @Consume('dataVersion') dataVersion: number;
+  private pageContext: PageContext = AppStorage.get<PageContext>(StorageKey.HOME_PAGE_CONTEXT) ?? new PageContext();
+  @StorageProp('dataVersion') dataVersion: number = 0;
   @State titleMode: HdsNavDestinationTitleMode = HdsNavDestinationTitleMode.MINI;
   @State blankHeight: number = TITLE_BAR_HEIGHT_FREE;
   @StorageProp('safeTop') safeTop: number = 0;
@@ -220,7 +220,7 @@ export struct GroupListPage {
                       cardSuffixMargin:0,
                       cardHeight: 64,
                       onClick: () => {
-                        this.pathStack.pushPath({ name: 'GroupDetail', param: group });
+                        this.pageContext.openPage({ routerName: PageEnum.GROUP_DETAIL_PAGE, param: group });
                       },
                     },
                     swipeActionOptions: {
@@ -314,4 +314,9 @@ export struct GroupListPage {
     .hideBackButton(false)
     .hideTitleBar(false);
   }
+}
+
+@Builder
+export function GroupListPageBuilder() {
+  GroupListPage()
 }

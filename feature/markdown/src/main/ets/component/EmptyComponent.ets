@@ -8,7 +8,7 @@ import { MdDbService } from '../service/MdDbService'
 @Component
 export struct EmptyView {
   @Consume('dataSource') dataSource: FileDataSource;
-  @Consume('dataVersion') dataVersion: number;
+  @StorageLink('dataVersion') dataVersion: number = 0;
   @StorageProp('safeBottom') safeBottom: number = 0;
   private context = this.getUIContext().getHostContext() as common.UIAbilityContext;
 

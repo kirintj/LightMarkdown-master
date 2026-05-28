@@ -9,7 +9,7 @@ import { systemShare, harmonyShare } from '@kit.ShareKit';
 import { uniformTypeDescriptor as utd } from '@kit.ArkData';
 import { fileIo as fs, fileUri } from '@kit.CoreFileKit';
 import { RenameDialog } from '../component/RenameDialog';
-import { GroupSheetContent, GroupItem, showDeleteConfirm, BreakpointType, GlobalInfoModel, StorageKey } from 'common';
+import { GroupSheetContent, GroupItem, showDeleteConfirm, BreakpointType, GlobalInfoModel, StorageKey, PageContext, PageEnum } from 'common';
 import { FileActionBar } from '../component/FileActionBar';
 
 const TITLE_BAR_HEIGHT_FREE: number = 58 + 16 + 4;
@@ -18,9 +18,9 @@ const DEFAULT_SHARE_DESCRIPTION: string = 'Markdown文档';
 @Component
 export struct MarkdownViewerPage {
   // 路由状态
-  @Consume('pathStack') pathStack: NavPathStack;
-  @Consume('dataVersion') dataVersion: number;
-  @Consume('dataSource') dataSource: FileDataSource;
+  private pageContext: PageContext = AppStorage.get<PageContext>(StorageKey.HOME_PAGE_CONTEXT) ?? new PageContext();
+  private dataSource: FileDataSource = AppStorage.get<FileDataSource>('dataSource') ?? new FileDataSource();
+  @StorageLink('dataVersion') dataVersion: number = 0;
   @State fileData: MarkdownFile = new MarkdownFile('', '', '', 0);
 
   // 滚动 & 控制器
@@ -270,7 +270,7 @@ export struct MarkdownViewerPage {
         this.dataSource.removeItem(index);
       }
       this.dataVersion++;
-      this.pathStack.pop();
+      this.pageContext.popPage();
       this.getUIContext().getPromptAction().showToast({ message: '已删除' });
     } catch (e) {
       console.error('[MarkdownViewerPage] 删除文件失败: ' + JSON.stringify(e));

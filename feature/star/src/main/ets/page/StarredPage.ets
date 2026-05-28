@@ -4,15 +4,15 @@ import { MarkdownFile, FileDataSource, FileGroup, MdDbService } from 'markdown';
 import { common } from '@kit.AbilityKit';
 import { HdsListItem, hdsMaterial, HdsNavDestinationTitleMode } from '@kit.UIDesignKit';
 import { HdsMiniBarButton } from 'hds_button';
-import { GroupSheetContent, EmptyState, GroupItem, formatRelativeTime, BreakpointType, GlobalInfoModel, StorageKey } from 'common';
+import { GroupSheetContent, EmptyState, GroupItem, formatRelativeTime, BreakpointType, GlobalInfoModel, StorageKey, PageContext, PageEnum } from 'common';
 
 const TITLE_BAR_HEIGHT_FREE: number = 56 + 56 + 8;
 
 @Component
 export struct StarredPage {
-  @Consume('pathStack') pathStack: NavPathStack;
-  @Consume('dataSource') dataSource: FileDataSource;
-  @Consume('dataVersion') dataVersion: number;
+  private pageContext: PageContext = AppStorage.get<PageContext>(StorageKey.HOME_PAGE_CONTEXT) ?? new PageContext();
+  private dataSource: FileDataSource = AppStorage.get<FileDataSource>('dataSource') ?? new FileDataSource();
+  @StorageLink('dataVersion') dataVersion: number = 0;
   @State titleMode: HdsNavDestinationTitleMode = HdsNavDestinationTitleMode.MINI;
   @State blankHeight: number = TITLE_BAR_HEIGHT_FREE;
   @StorageProp('safeTop') safeTop: number = 0;
@@ -206,7 +206,7 @@ export struct StarredPage {
                       cardPrefixMargin:0,
                       cardSuffixMargin:0,
                       onClick: () => {
-                        this.pathStack.pushPath({ name: 'MarkdownViewer', param: item });
+                        this.pageContext.openPage({ routerName: PageEnum.MARKDOWN_VIEWER, param: item });
                       },
                     },
                     swipeActionOptions: {
@@ -297,4 +297,9 @@ export struct StarredPage {
     .hideBackButton(false)
     .hideTitleBar(false);
   }
+}
+
+@Builder
+export function StarredPageBuilder() {
+  StarredPage()
 }

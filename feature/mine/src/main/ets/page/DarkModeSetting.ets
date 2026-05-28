@@ -1,7 +1,7 @@
 import { common } from '@kit.AbilityKit';
 import { setDarkColorMode, setLightColorMode, setAutoColorMode } from '../utils/ColorModeChangeFunctions';
 import { hdsMaterial, HdsNavDestination, ScrollEffectType } from '@kit.UIDesignKit';
-import { BreakpointType, GlobalInfoModel, StorageKey } from 'common';
+import { BreakpointType, GlobalInfoModel, StorageKey, PageContext } from 'common';
 
 @Component
 export struct DarkModeSetting {
@@ -9,7 +9,7 @@ export struct DarkModeSetting {
   @StorageProp('isFollowSystemSetting') isFollowSystemSetting: boolean = true;
   @StorageProp('currentColorMode') currentColorMode: number = 0;
   private context: common.UIAbilityContext = this.getUIContext().getHostContext() as common.UIAbilityContext;
-  @Consume('pathStack') pathStack: NavPathStack;
+  private pageContext: PageContext = AppStorage.get<PageContext>(StorageKey.HOME_PAGE_CONTEXT) ?? new PageContext();
   aboutToDisappear(): void {
     AppStorage.setOrCreate('enableDarkMode', this.enableDarkMode);
     AppStorage.setOrCreate('isFollowSystemSetting', this.isFollowSystemSetting);

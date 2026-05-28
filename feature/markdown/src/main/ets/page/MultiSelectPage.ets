@@ -9,14 +9,14 @@ import { systemShare } from '@kit.ShareKit';
 import { uniformTypeDescriptor as utd } from '@kit.ArkData';
 import { BusinessError } from '@kit.BasicServicesKit';
 import { GroupSheetContent, showDeleteConfirm, GroupItem, BreakpointType, StorageKey,
-  GlobalInfoModel } from 'common';
+  GlobalInfoModel, PageContext, PageEnum } from 'common';
 import { BatchToolbar } from '../component/BatchToolbar';
 
 @Component
 export struct MultiSelectPage {
-  @Consume('pathStack') pathStack: NavPathStack;
-  @Consume('dataSource') dataSource: FileDataSource;
-  @Consume('dataVersion') dataVersion: number;
+  private pageContext: PageContext = AppStorage.get<PageContext>(StorageKey.HOME_PAGE_CONTEXT) ?? new PageContext();
+  private dataSource: FileDataSource = AppStorage.get<FileDataSource>('dataSource') ?? new FileDataSource();
+  @StorageLink('dataVersion') dataVersion: number = 0;
   @StorageProp('safeTop') safeTop: number = 0;
   @StorageProp('safeBottom') safeBottom: number = 0;
   @StorageProp(StorageKey.GLOBAL_INFO) globalInfoModel: GlobalInfoModel =

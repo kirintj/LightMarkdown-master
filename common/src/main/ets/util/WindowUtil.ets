@@ -1,5 +1,6 @@
 import { window } from '@kit.ArkUI';
-import { GlobalInfoModel, StorageKey } from '../model/GlobalInfoModel';
+import { GlobalInfoModel } from '../model/GlobalInfoModel';
+import { StorageKey } from '../constant/CommonEnums';
 
 const ASPECT_SQUARE_PORTRAIT: number = 9 / 10.8;
 const ASPECT_LANDSCAPE_SQUARE: number = 10.8 / 9;
