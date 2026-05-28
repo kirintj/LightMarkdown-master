@@ -1,14 +1,14 @@
-import { HdsNavDestination, HdsNavDestinationTitleMode, ScrollEffectType } from '@hms.hds.hdsBaseComponent';
+import { HdsNavDestination, HdsNavDestinationTitleMode, ScrollEffectType, PrefixCustomBuilder } from '@hms.hds.hdsBaseComponent';
 import { promptAction } from '@kit.ArkUI';
 import { MarkdownFile, FileDataSource, FileGroup } from '../class/MarkdownFile';
 import { MdDbService } from '../service/MdDbService'
 import { common } from '@kit.AbilityKit';
-import { hdsMaterial, HdsTabs } from '@kit.UIDesignKit';
+import { hdsMaterial, HdsListItem, HdsTabs } from '@kit.UIDesignKit';
 import { fileIo as fs, fileUri } from '@kit.CoreFileKit';
 import { systemShare } from '@kit.ShareKit';
 import { uniformTypeDescriptor as utd } from '@kit.ArkData';
 import { BusinessError } from '@kit.BasicServicesKit';
-import { FileListCard, GroupSheetContent, showDeleteConfirm, GroupItem, BreakpointType, StorageKey,
+import { GroupSheetContent, showDeleteConfirm, GroupItem, BreakpointType, StorageKey,
   GlobalInfoModel } from 'common';
 import { BatchToolbar } from '../component/BatchToolbar';
 
@@ -30,6 +30,41 @@ export struct MultiSelectPage {
   @State groups: FileGroup[] = [];
   @State groupTargetFile: MarkdownFile | null = null;
   @State newGroupName: string = '';
+
+  @Builder
+  selectableFileCard(item: MarkdownFile): void {
+    Row() {
+      SymbolGlyph($r('sys.symbol.doc_plaintext_fill'))
+        .fontSize($r('sys.float.Title_M'))
+        .fontColor([$r('sys.color.brand')]);
+      Column() {
+        Text(item.name)
+          .fontSize($r('sys.float.Subtitle_M'))
+          .fontWeight(FontWeight.Medium)
+          .fontColor($r('sys.color.font_primary'))
+          .maxLines(1)
+          .textOverflow({ overflow: TextOverflow.Ellipsis });
+        if (item.groupName) {
+          Text(item.groupName)
+            .padding({ left: 8, right: 8, top: 2, bottom: 2 })
+            .fontSize($r('sys.float.Caption_S'))
+            .fontWeight(FontWeight.Bold)
+            .fontColor($r('sys.color.white'))
+            .backgroundColor($r('sys.color.confirm'))
+            .borderRadius(8)
+            .margin({ top: 2 });
+        }
+      }
+      .alignItems(HorizontalAlign.Start)
+      .margin({ left: $r('sys.float.padding_level6') })
+      .layoutWeight(1);
+      Blank();
+      Checkbox()
+        .select(this.isSelected(item.sandboxPath));
+    }
+    .width('100%')
+    .padding($r('sys.float.padding_level6'));
+  }
 
   async aboutToAppear(): Promise<void> {
     await this.loadData();
@@ -210,33 +245,19 @@ export struct MultiSelectPage {
     } else {
       List({ space: 12 }) {
         ForEach(this.allFiles, (item: MarkdownFile) => {
-          ListItem() {
-            Row() {
-              FileListCard({
-                name: item.name,
-                subtitle: item.groupName ? item.groupName : '',
-                isStar: item.isStar,
-                groupId: item.groupId,
-                groupName: item.groupName,
-                onTap: () => { this.toggleSelect(item.sandboxPath); }
-              })
-              .layoutWeight(1)
-              Checkbox()
-                .select(this.isSelected(item.sandboxPath))
-                .onChange((_checked: boolean) => {
-                  this.toggleSelect(item.sandboxPath);
-                })
-                .margin({ left: 12 });
-            }
-            .height(56)
-            .width('100%')
-            .padding($r('sys.float.padding_level6'))
-            .backgroundColor($r('sys.color.comp_background_primary'))
-            .borderRadius(16)
-            .onClick(() => {
-              this.toggleSelect(item.sandboxPath);
-            });
-          }
+          HdsListItem({
+            hdsListItemCard: {
+              prefixItem: new PrefixCustomBuilder(() => {
+                this.selectableFileCard(item);
+              }),
+              cardHeight: 64,
+              cardPrefixMargin:0,
+              cardSuffixMargin:0,
+              onClick: () => {
+                this.toggleSelect(item.sandboxPath);
+              },
+            },
+          });
         }, (item: MarkdownFile) => `${item.sandboxPath}_${this.isSelected(item.sandboxPath)}`);
       }
       .width('100%')

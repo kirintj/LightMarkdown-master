@@ -185,6 +185,11 @@ export struct RecentPage {
           .justifyContent(FlexAlign.Center);
         }
       }
+      .padding(new BreakpointType<Padding>({
+        sm: { left: 16, right: 16 },
+        md: { left: 24, right: 24 },
+        lg: { left: 32, right: 32 },
+      }).getValue(this.globalInfoModel.widthBreakpoint))
     }
     .backgroundColor($r('sys.color.background_secondary'))
     .titleBar({

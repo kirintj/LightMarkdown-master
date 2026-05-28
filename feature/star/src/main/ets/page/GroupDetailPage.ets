@@ -271,7 +271,11 @@ export struct GroupDetailPage {
           this.applyFilter();
         });
     }
-    .padding({ left: 16, right: 16 })
+    .padding(new BreakpointType<Padding>({
+      sm: { left: 16, right: 16 },
+      md: { left: 24, right: 24 },
+      lg: { left: 32, right: 32 },
+    }).getValue(this.globalInfoModel.widthBreakpoint))
     .height(56);
   }
 
@@ -346,6 +350,11 @@ export struct GroupDetailPage {
           .justifyContent(FlexAlign.Center);
         }
       }
+      .padding(new BreakpointType<Padding>({
+        sm: { left: 16, right: 16 },
+        md: { left: 24, right: 24 },
+        lg: { left: 32, right: 32 },
+      }).getValue(this.globalInfoModel.widthBreakpoint))
     }
     .bindSheet(this.showAddSheet, this.addFileSheetBuilder(), {
       detents: [SheetSize.MEDIUM, SheetSize.LARGE],

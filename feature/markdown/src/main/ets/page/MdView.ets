@@ -13,7 +13,7 @@ import { systemShare, harmonyShare } from '@kit.ShareKit';
 import { uniformTypeDescriptor as utd } from '@kit.ArkData';
 import { BusinessError } from '@kit.BasicServicesKit';
 import { FloatBall } from '../component/FloatBall'
-import { FileListCard, GroupSheetContent, GroupItem, showDeleteConfirm, formatRelativeTime, BreakpointType, GlobalInfoModel, StorageKey } from 'common';
+import { GroupSheetContent, GroupItem, showDeleteConfirm, formatRelativeTime, BreakpointType, GlobalInfoModel, StorageKey } from 'common';
 import { FileGridCard } from '../component/FileGridCard';
 const TITLE_BAR_HEIGHT_FREE: number = 56 + 56 + 8;
 
@@ -531,32 +531,6 @@ export struct MdView {
   }
 
   @Builder
-  itemSwipeBuilder(item: MarkdownFile): void {
-    Row() {
-      Button({ type: ButtonType.Circle }) {
-        SymbolGlyph($r('sys.symbol.folder_fill'))
-          .fontSize(16)
-          .fontColor([Color.White]);
-      }
-      .backgroundColor('#36C972')
-      .width(48)
-      .height(48)
-      .margin({ left: 8 })
-      .onClick(() => { this.openGroupSheet(item); });
-
-      Button({ type: ButtonType.Circle }) {
-        SymbolGlyph($r('sys.symbol.star_fill'))
-          .fontSize(16)
-          .fontColor([Color.White]);
-      }
-      .backgroundColor('#FFC83D')
-      .width(48)
-      .height(48)
-      .margin({ left: 8 })
-      .onClick(() => { this.toggleStar(item); });
-    }
-  }
-  @Builder
   SubMenu() {
     Menu() {
       MenuItem({
@@ -681,23 +655,56 @@ export struct MdView {
                     }).getValue(this.globalInfoModel.widthBreakpoint)
                   }) {
                     ForEach(this.filteredFiles, (item: MarkdownFile) => {
-                      ListItem() {
-                        FileListCard({
-                          name: item.name,
-                          subtitle: item.groupName ? item.groupName : formatRelativeTime(item.lastViewedAt),
-                          isStar: item.isStar,
-                          groupId: item.groupId,
-                          groupName: item.groupName,
-                          onTap: () => { this.pathStack.pushPath({ name: 'MarkdownViewer', param: item }); },
-                          onStar: () => { this.toggleStar(item); }
-                        })
-                        .height(56)
-                        .backgroundColor($r('sys.color.comp_background_primary'))
-                        .borderRadius(16)
-                      }
-                      .swipeAction({
-                        end: {
-                          builder: () => { this.itemSwipeBuilder(item); }
+                      HdsListItem({
+                        hdsListItemCard: {
+                          prefixItem: new PrefixCustomBuilder(() => {
+                            this.listCard(item);
+                          }),
+                          cardHeight: 64,
+                          cardPrefixMargin:0,
+                          cardSuffixMargin:0,
+                          onClick: () => {
+                            this.pathStack.pushPath({ name: 'MarkdownViewer', param: item });
+                          },
+                        },
+                        swipeActionOptions: {
+                          icons: [
+                            {
+                              icon: new SymbolGlyphModifier($r('sys.symbol.arrow_right_folder_fill')).fontColor([Color.White]).fontSize(16),
+                              backgroundColor: '#36C972',
+                              onAction: () => {
+                                this.openGroupSheet(item);
+                              }
+                            },
+                            {
+                              icon: new SymbolGlyphModifier($r('sys.symbol.share')).fontColor([Color.White]).fontSize(16),
+                              backgroundColor: '#3A7BFF',
+                              onAction: () => {
+                                this.shareTargetFile = item;
+                                this.doSystemShare(item);
+                              }
+                            },
+                            {
+                              icon: new SymbolGlyphModifier($r('sys.symbol.star_fill')).fontColor([Color.White]).fontSize(16),
+                              backgroundColor: '#FFC83D',
+                              onAction: () => {
+                                this.toggleStar(item);
+                              }
+                            }
+                          ],
+                          deleteIconOptions: {
+                            backgroundColor: '#FF5A5F',
+                            iconColor: Color.White,
+                            onAction: () => {
+                              this.confirmDeleteFile(item);
+                            },
+                          },
+                          fullDeleteOptions: {
+                            isFullDelete: true,
+                            onFullDeleteAction: () => {
+                              this.confirmDeleteFile(item);
+                            }
+                          }
                         }
                       });
                     }, (item: MarkdownFile) => `${item.sandboxPath}_${item.isStar}_${item.groupName}`);
