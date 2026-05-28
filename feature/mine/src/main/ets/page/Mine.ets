@@ -32,7 +32,7 @@ export struct Mine {
   @State isLogin: boolean = false;
   @State avatarUrl: string = '';
   @State nickName: string = '';
-  @State showLogoutDialog: boolean = false;
+  @State isShowAccountInfo: boolean = false;
   private context = this.getUIContext().getHostContext() as common.UIAbilityContext;
 
   async aboutToAppear(): Promise<void> {
@@ -146,10 +146,11 @@ export struct Mine {
             List({ space: 0 }) {
               ListItemGroup() {
                 ListItem({ style: ListItemStyle.CARD }) {
-                  if (this.isLogin) {
-                    Row() {
+                  Row() {
+                    if (this.isLogin) {
                       if (this.avatarUrl) {
                         Image(this.avatarUrl)
+                          .draggable(false)
                           .width(48)
                           .height(48)
                           .borderRadius(24)
@@ -158,38 +159,50 @@ export struct Mine {
                           .width(48)
                           .height(48)
                           .borderRadius(24)
-                          .backgroundColor('#1890ff')
-                          .fontColor(Color.White)
+                          .backgroundColor($r('sys.color.ohos_id_color_tertiary'))
+                          .linearGradient({
+                            colors: [
+                              [$r('sys.color.ohos_id_color_tertiary'), 0.0],
+                              [$r('sys.color.ohos_id_color_foreground_contrary'), 1.0],
+                            ],
+                          })
+                          .fontColor($r('sys.color.font_on_primary'))
                           .fontSize(20)
+                          .fontWeight(FontWeight.Bold)
                           .textAlign(TextAlign.Center)
                       }
                       Text(this.nickName)
-                        .fontSize(16)
                         .margin({ left: 12 })
-                      Blank()
-                      Text('退出登录')
-                        .fontSize(14)
-                        .fontColor($r('sys.color.font_secondary'))
-                        .margin({ right: 16 })
+                        .fontColor($r('sys.color.font_primary'))
+                        .fontSize(16)
+                        .fontWeight(FontWeight.Medium)
+                    } else {
+                      SymbolGlyph($r('sys.symbol.person_crop_circle_fill_1'))
+                        .fontSize(48)
+                        .fontColor([$r('sys.color.icon_fourth')])
+                      Text('未登录')
+                        .fontSize(16)
+                        .fontWeight(FontWeight.Medium)
+                        .fontColor($r('sys.color.font_primary'))
+                        .margin({ left: 12 })
                     }
-                    .width('100%')
-                    .justifyContent(FlexAlign.Start)
-                    .padding({ left: 16 })
-                    .onClick(() => {
-                      this.showLogoutDialog = true;
-                    })
-                  } else {
-                    CardItem({
-                      isShow: true,
-                      textContent: '登录 / 账号',
-                      symbolSrc: $r('sys.symbol.person'),
-                      onclick: () => {
-                        this.handleLogin();
-                      },
-                    })
                   }
+                  .width('100%')
+                  .height(68)
+                  .bindSheet($$this.isShowAccountInfo, this.AccountSheetBuilder, {
+                    height: 200,
+                    preferType: SheetType.CENTER,
+                    enableOutsideInteractive: false,
+                  })
+                  .onClick(() => {
+                    if (!this.isLogin) {
+                      this.handleLogin();
+                    } else {
+                      this.isShowAccountInfo = true;
+                    }
+                  })
                 }
-                .height(68)
+                .height(undefined)
                 .width('100%')
               }
               .divider({
@@ -381,37 +394,66 @@ export struct Mine {
         },
       }
     })
-    .bindSheet($$this.showLogoutDialog, this.logoutSheetBuilder, {
+    .bindSheet($$this.isShowAccountInfo, this.AccountSheetBuilder, {
       height: 200,
       dragBar: true,
     })
   }
 
   @Builder
-  logoutSheetBuilder() {
+  AccountSheetBuilder() {
     Column() {
-      Text('确认退出登录？')
+      // 头像
+      if (this.avatarUrl) {
+        Image(this.avatarUrl)
+          .draggable(false)
+          .width(64)
+          .height(64)
+          .borderRadius(32)
+          .margin({ top: 20 })
+      } else {
+        Text(this.nickName.slice(-1))
+          .width(64)
+          .height(64)
+          .borderRadius(32)
+          .backgroundColor($r('sys.color.ohos_id_color_tertiary'))
+          .linearGradient({
+            colors: [
+              [$r('sys.color.ohos_id_color_tertiary'), 0.0],
+              [$r('sys.color.ohos_id_color_foreground_contrary'), 1.0],
+            ],
+          })
+          .fontColor($r('sys.color.font_on_primary'))
+          .fontSize(24)
+          .fontWeight(FontWeight.Bold)
+          .textAlign(TextAlign.Center)
+          .margin({ top: 20 })
+      }
+
+      // 昵称
+      Text(this.nickName)
         .fontSize(18)
         .fontWeight(FontWeight.Medium)
-        .margin({ top: 20, bottom: 8 })
+        .fontColor($r('sys.color.font_primary'))
+        .margin({ top: 12 })
 
-      Text(`当前账号：${this.nickName}`)
-        .fontSize(14)
-        .fontColor($r('sys.color.font_secondary'))
-        .margin({ bottom: 20 })
+      Blank()
 
+      // 退出登录按钮
       Button('退出登录')
         .type(ButtonType.Capsule)
         .width('90%')
         .height(44)
         .backgroundColor('#E53935')
         .fontColor(Color.White)
+        .margin({ bottom: 20 })
         .onClick(() => {
           AccountService.getInstance().logoutDirect();
-          this.showLogoutDialog = false;
+          this.isShowAccountInfo = false;
         })
     }
     .width('100%')
+    .height('100%')
     .alignItems(HorizontalAlign.Center)
   }
 }
