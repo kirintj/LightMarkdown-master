@@ -60,6 +60,9 @@ export class AccountService {
           this.userAccount.avatarUrl = authCredential.avatarUri ?? '';
           this.userAccount.nickname = authCredential.nickName ?? '';
           this.userAccount.unionId = authCredential.unionID ?? '';
+          this.userLogin = true;
+          this.updatePreference(this.userLogin, this.userAccount);
+          emitter.emit(AccountEvent.BIND_MINE_LOGIN_EVENT);
           resolve(this.userAccount);
         })
         .catch((error: BusinessError) => {
@@ -106,16 +109,11 @@ export class AccountService {
   public logoutDirect(): Promise<boolean> {
     return new Promise((resolve) => {
       this.userLogin = false;
+      this.userAccount = new UserAccount();
       emitter.emit(AccountEvent.BIND_LOGOUT_EVENT);
       this.finishLogin();
       resolve(true);
     });
-  }
-
-  public selectHuaweiAccountToLogin() {
-    this.userLogin = true;
-    this.updatePreference(this.userLogin, this.userAccount);
-    emitter.emit(AccountEvent.BIND_MINE_LOGIN_EVENT);
   }
 
   public getUserInfo(): UserAccount | undefined {

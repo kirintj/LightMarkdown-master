@@ -2,8 +2,7 @@ import { Configuration, ConfigurationConstant, UIAbility, Want } from '@kit.Abil
 import { hilog } from '@kit.PerformanceAnalysisKit';
 import { AppStorageV2, window } from '@kit.ArkUI';
 import { WindowUtil, GlobalInfoModel, StorageKey, PageContext } from 'common';
-import { AccountService } from 'common';
-import { PreferenceManager } from 'common/src/main/ets/util/PreferenceManager';
+import { AccountService, PreferenceManager } from 'common';
 
 const DOMAIN = 0x0000;
 

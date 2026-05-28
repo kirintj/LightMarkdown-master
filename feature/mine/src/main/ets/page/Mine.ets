@@ -53,6 +53,11 @@ export struct Mine {
     this.updateAccountData();
   }
 
+  aboutToDisappear() {
+    emitter.off(AccountEvent.BIND_MINE_LOGIN_EVENT);
+    emitter.off(AccountEvent.BIND_LOGOUT_EVENT);
+  }
+
   onDataVersionChange(): void {
     this.loadStats();
   }
@@ -116,10 +121,13 @@ export struct Mine {
       .then((userAccount) => {
         this.avatarUrl = userAccount.avatarUrl;
         this.nickName = userAccount.nickname;
-        AccountService.getInstance().selectHuaweiAccountToLogin();
       })
       .catch((error: Error) => {
         console.error('[Mine] Login failed:', JSON.stringify(error));
+        // TODO: 根据 error.code 展示不同提示
+        // 1001500001 - 用户取消登录
+        // 1001500002 - 网络连接失败
+        // 其他 - 登录失败，请重试
       });
   }
 
