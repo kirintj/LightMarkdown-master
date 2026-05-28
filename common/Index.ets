@@ -35,3 +35,5 @@ export { UserAccount } from './src/main/ets/accountservice/model/UserAccount'
 export { AccountEvent } from './src/main/ets/constant/CommonEnums'
 export { PreferenceManager } from './src/main/ets/util/PreferenceManager'
 export { SpringCurve, AnimDuration, ScaleValue, AnimUtil } from './src/main/ets/util/AnimationUtil'
+
+export { UpdateService } from './src/main/ets/updateservice/UpdateService'

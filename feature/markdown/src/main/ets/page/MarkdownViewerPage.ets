@@ -64,6 +64,7 @@ export struct MarkdownViewerPage {
 
   aboutToDisappear(): void {
     this.isDestroyed = true;
+    this.renameController?.close();
     this.unregisterHarmonyShareListeners();
     this.dismissShareController();
   }
@@ -280,6 +281,7 @@ export struct MarkdownViewerPage {
   }
 
   private showRenameInputDialog(): void {
+    this.renameController?.close();
     this.renameController = new CustomDialogController({
       builder: RenameDialog({
         initialName: this.fileData.name,

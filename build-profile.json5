@@ -6,12 +6,12 @@
         "type": "HarmonyOS",
         "material": {
           "storeFile": "D:/key/qingmo/QingMo.p12",
-          "storePassword": "0000002007587D4390722B95FE206AA75BB9FD32C9A6323043E2AB6F8B9868A882BC354E11BF858F29D7A4AD8BA3B2BC",
+          "storePassword": "00000020ABF29CC79590FE9D26EE4C6C99594CC108372D632F13514D518D7D2427371F7A74868A4E3B6B257BF13F07D3",
           "keyAlias": "markdownBox",
-          "keyPassword": "000000209C1C440FA67437B7AF3ABAA1ED3E9EB88C300D6D807A5792AA84CBF56E18571EEEC0DD5B1908E1BA001CF41B",
+          "keyPassword": "000000205FA197CA99F4419AC2AF8628939C4BD5944B39B4963C22DAB0FBC68FF2E75DA28C9E05BB0F2C164CCB6BAE48",
           "signAlg": "SHA256withECDSA",
-          "profile": "D:/key/qingmo/testAPPDebug.p7b",
-          "certpath": "D:/key/qingmo/QingmoTest.cer"
+          "profile": "D:/key/qingmo/qingMarkdown_releaseRelease.p7b",
+          "certpath": "D:/key/qingmo/QingMO_Cert.cer"
         }
       },
       {

@@ -335,7 +335,7 @@ export struct Mine {
                   CardItem({
                     isShow: true,
                     textContent: '意见反馈',
-                    symbolSrc: $r('sys.symbol.warning'),
+                    symbolSrc: $r('sys.symbol.questionmark_circle'),
                     onclick: () => {
                       this.pageContext.openPage({ routerName: PageEnum.FEEDBACK_PAGE });
                     },

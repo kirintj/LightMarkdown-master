@@ -369,28 +369,42 @@ export struct Star {
           .scrollBar(BarState.Off)
           .height(200)
 
-          this.sectionTitle('数据概览')
-          Column() {
-            McBarChart({ options: this.overviewOption })
-          }
-          .width('100%')
-          .height(240)
-          .padding({ top: 8, bottom: 8 })
-          .backgroundColor($r('sys.color.comp_background_primary'))
-          .borderRadius(16)
-          .shadow({ radius: 8, color: '#0A000000', offsetY: 2 })
-
-          if (this.groups.length > 0 || this.ungroupedCount > 0) {
-            this.sectionTitle('分组分布')
-            Row() {
-              McPieChart({ options: this.groupOption })
+          GridRow({
+            columns: new BreakpointType<number>({ sm: 1, md: 2, lg: 2 })
+              .getValue(this.globalInfoModel.widthBreakpoint),
+            gutter: 16
+          }) {
+            GridCol({ span: 1 }) {
+              Column() {
+                this.sectionTitle('数据概览')
+                Column() {
+                  McBarChart({ options: this.overviewOption })
+                }
+                .width('100%')
+                .height(300)
+                .padding({ top: 8, bottom: 8 })
+                .backgroundColor($r('sys.color.comp_background_primary'))
+                .borderRadius(16)
+                .shadow({ radius: 8, color: '#0A000000', offsetY: 2 })
+              }
             }
-            .width('100%')
-            .height(300)
-            .padding({ left: 12, right: 12, top: 8, bottom: 8 })
-            .backgroundColor($r('sys.color.comp_background_primary'))
-            .borderRadius(16)
-            .shadow({ radius: 8, color: '#0A000000', offsetY: 2 })
+
+            if (this.groups.length > 0 || this.ungroupedCount > 0) {
+              GridCol({ span: 1 }) {
+                Column() {
+                  this.sectionTitle('分组分布')
+                  Row() {
+                    McPieChart({ options: this.groupOption })
+                  }
+                  .width('100%')
+                  .height(300)
+                  .padding({ left: 12, right: 12, top: 8, bottom: 8 })
+                  .backgroundColor($r('sys.color.comp_background_primary'))
+                  .borderRadius(16)
+                  .shadow({ radius: 8, color: '#0A000000', offsetY: 2 })
+                }
+              }
+            }
           }
           Blank().height(56 + this.safeBottom + 8)
         }
