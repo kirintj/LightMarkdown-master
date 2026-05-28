@@ -2,7 +2,7 @@ import { HdsNavDestination, ScrollEffectType, PrefixCustomBuilder } from '@hms.h
 import { LengthMetrics, promptAction, SymbolGlyphModifier } from '@kit.ArkUI';
 import { MarkdownFile, FileDataSource, FileGroup, MdDbService } from 'markdown';
 import { common } from '@kit.AbilityKit';
-import { HdsListItem, hdsMaterial, HdsNavDestinationTitleMode, IconStyleMode } from '@kit.UIDesignKit';
+import { HdsListItem, hdsMaterial, HdsNavDestinationTitleMode } from '@kit.UIDesignKit';
 import { EmptyState, showDeleteConfirm, BreakpointType, GlobalInfoModel, StorageKey, PageContext, PageEnum } from 'common';
 const TITLE_BAR_HEIGHT_FREE: number = 56 + 56 + 8;
 
@@ -151,78 +151,63 @@ export struct GroupDetailPage {
 
   @Builder
   addFileSheetBuilder(){
-      HdsNavDestination(){
-        Scroll(this.scroller){
-          Column(){
-            if (this.candidateFiles.length > 0) {
-              List({ space: 8 }) {
-                ForEach(this.candidateFiles, (file: MarkdownFile) => {
-                  HdsListItem({
-                    hdsListItemCard: {
-                      prefixItem: new PrefixCustomBuilder(() => {
-                        this.candidateFileCard(file);
-                      }),
-                      cardHeight: 64,
-                      cardPrefixMargin:0,
-                      cardSuffixMargin:0,
-                      onClick: () => {
-                        this.addFileToGroup(file);
-                      },
-                    },
-                  });
-                }, (file: MarkdownFile) => file.sandboxPath);
-              }
-              .height(undefined)
-              .width('100%')
-            } else {
-              Column() {
-                Text('没有可添加的文件')
-                  .fontSize(14)
-                  .fontColor($r('sys.color.font_secondary'));
-              }
-              .width('100%')
-              .height(120)
-              .justifyContent(FlexAlign.Center);
-            }
-          }
-          .constraintSize({ minHeight: '100%' })
-          .width('100%')
-        }
-        .scrollBar(BarState.Auto)
-        .edgeEffect(EdgeEffect.Spring)
-        .width('100%')
-        .height('100%')
+    Column() {
+      Row() {
+        Text('添加文件到分组')
+          .fontSize(18)
+          .fontWeight(FontWeight.Medium)
+          .fontColor($r('sys.color.font_primary'))
+        Blank()
+        SymbolGlyph($r('sys.symbol.xmark'))
+          .fontSize(20)
+          .fontColor([$r('sys.color.icon_secondary')])
+          .onClick(() => { this.showAddSheet = false; })
       }
-      .hideBackButton(true)
-      .titleMode(HdsNavDestinationTitleMode.MODAL)
-      .titleBar({
-        style: {
-          scrollEffectOpts: {
-            scrollEffectType: ScrollEffectType.GRADIENT_BLUR,
-          },
-          systemMaterialEffect: {
-            materialType: hdsMaterial.MaterialType.IMMERSIVE,
-            materialLevel: hdsMaterial.MaterialLevel.EXQUISITE
-          },
-        },
-        enableComponentSafeArea: true,
-        content: {
-          title: {
-            mainTitle: '添加文件到分组',
-          },
-          menu: {
-            value: [{
-              content: {
-                icon: $r('sys.symbol.xmark'),
-                type: IconStyleMode.SMALL,
-                action: () => {
-                  this.showAddSheet = false;
+      .width('100%')
+      .padding({ left: 20, right: 20, top: 16, bottom: 12 })
+
+      if (this.candidateFiles.length > 0) {
+        List({ space: 8 }) {
+          ForEach(this.candidateFiles, (file: MarkdownFile) => {
+            HdsListItem({
+              hdsListItemCard: {
+                prefixItem: new PrefixCustomBuilder(() => {
+                  this.candidateFileCard(file);
+                }),
+                cardHeight: 64,
+                cardPrefixMargin: 0,
+                cardSuffixMargin: 0,
+                onClick: () => {
+                  this.addFileToGroup(file);
                 },
-              }
-            }]
-          },
-        },
-      })
+              },
+            });
+          }, (file: MarkdownFile) => file.sandboxPath);
+        }
+        .height(undefined)
+        .width('100%')
+      } else {
+        Column() {
+          SymbolGlyph($r('sys.symbol.doc_plaintext'))
+            .fontSize(32)
+            .fontColor([$r('sys.color.font_tertiary')])
+          Text('没有可添加的文件')
+            .fontSize(14)
+            .fontColor($r('sys.color.font_tertiary'))
+            .margin({ top: 8 })
+        }
+        .width('100%')
+        .padding({ top: 24, bottom: 24 })
+      }
+    }
+    .padding(new BreakpointType<Padding>({
+      sm: { left: 16, right: 16 },
+      md: { left: 24, right: 24 },
+      lg: { left: 32, right: 32 },
+    }).getValue(this.globalInfoModel.widthBreakpoint))
+    .width('100%')
+    .backgroundColor($r('sys.color.background_secondary'))
+    .borderRadius(16)
   }
 
   @Builder
@@ -357,9 +342,12 @@ export struct GroupDetailPage {
       }).getValue(this.globalInfoModel.widthBreakpoint))
     }
     .bindSheet(this.showAddSheet, this.addFileSheetBuilder(), {
-      detents: [SheetSize.MEDIUM, SheetSize.LARGE],
+      height: 400,
+      preferType: SheetType.CENTER,
+      enableOutsideInteractive: false,
+      dragBar: false,
       showClose: false,
-      enableFloatingDragBar: true,
+      backgroundColor: $r('sys.color.background_secondary'),
       onDisappear: () => { this.showAddSheet = false; }
     })
     .backgroundColor($r('sys.color.background_secondary'))

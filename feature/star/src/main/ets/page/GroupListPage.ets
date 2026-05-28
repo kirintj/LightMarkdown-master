@@ -2,7 +2,7 @@ import { HdsNavDestination, ScrollEffectType, PrefixCustomBuilder } from '@hms.h
 import { LengthMetrics, promptAction, SymbolGlyphModifier } from '@kit.ArkUI';
 import { FileGroup, MdDbService } from 'markdown';
 import { common } from '@kit.AbilityKit';
-import { HdsListItem, hdsMaterial, HdsNavDestinationTitleMode, IconStyleMode } from '@kit.UIDesignKit';
+import { HdsListItem, hdsMaterial, HdsNavDestinationTitleMode } from '@kit.UIDesignKit';
 import { EmptyState, BreakpointType, GlobalInfoModel, StorageKey, PageContext, PageEnum } from 'common';
 
 const TITLE_BAR_HEIGHT_FREE: number = 56 + 56 + 8;
@@ -84,62 +84,44 @@ export struct GroupListPage {
 
   @Builder
   createGroupSheetBuilder() {
-    HdsNavDestination(){
-      Scroll() {
-        Column() {
-          TextInput({ placeholder: '输入分组名称' })
-            .id('group_name_input')
-            .defaultFocus(true)
-            .onChange((value: string) => { this.newGroupName = value; })
-            .onSubmit(() => this.createGroup())
-            .margin({bottom: 16})
-          Button('创建')
-            .type(ButtonType.Capsule)
-            .backgroundColor($r('sys.color.brand'))
-            .fontColor(Color.White)
-            .height(36)
-            .width('100%')
-            .enabled(this.newGroupName.trim().length > 0)
-            .onClick(() => this.createGroup())
-        }
-        .width('100%')
-        .padding({ left: 16, right: 16,})
+    Column() {
+      Row() {
+        Text('新建分组')
+          .fontSize(18)
+          .fontWeight(FontWeight.Medium)
+          .fontColor($r('sys.color.font_primary'))
+        Blank()
+        SymbolGlyph($r('sys.symbol.xmark'))
+          .fontSize(20)
+          .fontColor([$r('sys.color.icon_secondary')])
+          .onClick(() => { this.showCreateSheet = false; })
       }
-      .clip(false)
-      .scrollBar(BarState.Off)
-      .edgeEffect(EdgeEffect.Spring, { alwaysEnabled: true })
-    }
-    .hideBackButton(true)
-    .titleMode(HdsNavDestinationTitleMode.MODAL)
-    .titleBar({
-      style: {
-        scrollEffectOpts: {
-          scrollEffectType: ScrollEffectType.GRADIENT_BLUR,
-        },
-        systemMaterialEffect: {
-          materialType: hdsMaterial.MaterialType.IMMERSIVE,
-          materialLevel: hdsMaterial.MaterialLevel.EXQUISITE
-        },
-      },
-      enableComponentSafeArea: true,
-      content: {
-        title: {
-          mainTitle: '新建分组',
-        },
-        menu: {
-          value: [{
-            content: {
-              icon: $r('sys.symbol.xmark'),
-              type: IconStyleMode.SMALL,
-              action: () => {
-                this.showCreateSheet = false;
-              },
-            }
-          }]
-        },
-      },
+      .width('100%')
+      .padding({ left: 20, right: 20, top: 16, bottom: 12 })
 
-    })
+      Column() {
+        TextInput({ placeholder: '输入分组名称' })
+          .id('group_name_input')
+          .defaultFocus(true)
+          .onChange((value: string) => { this.newGroupName = value; })
+          .onSubmit(() => this.createGroup())
+          .margin({ bottom: 16 })
+        Button('创建')
+          .type(ButtonType.Capsule)
+          .backgroundColor($r('sys.color.brand'))
+          .fontColor(Color.White)
+          .height(40)
+          .width('100%')
+          .enabled(this.newGroupName.trim().length > 0)
+          .opacity(this.newGroupName.trim().length > 0 ? 1 : 0.5)
+          .onClick(() => this.createGroup())
+      }
+      .width('100%')
+      .padding({ left: 20, right: 20, bottom: 32 })
+    }
+    .width('100%')
+    .backgroundColor($r('sys.color.background_secondary'))
+    .borderRadius(16)
   }
 
 
@@ -267,9 +249,12 @@ export struct GroupListPage {
       }).getValue(this.globalInfoModel.widthBreakpoint))
     }
     .bindSheet(this.showCreateSheet, this.createGroupSheetBuilder(), {
+      height: 280,
+      preferType: SheetType.CENTER,
+      enableOutsideInteractive: false,
+      dragBar: false,
       showClose: false,
-      enableFloatingDragBar: true,
-      backgroundColor: $r('sys.color.comp_background_primary'),
+      backgroundColor: $r('sys.color.background_secondary'),
       onDisappear: () => { this.showCreateSheet = false; }
     })
     .backgroundColor($r('sys.color.background_secondary'))

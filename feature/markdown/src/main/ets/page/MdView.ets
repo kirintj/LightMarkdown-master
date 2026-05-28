@@ -34,7 +34,7 @@ export struct MdView {
   private context = this.getUIContext().getHostContext() as common.UIAbilityContext;
   private shareController: systemShare.ShareController | null = null;
   private shareTargetFile: MarkdownFile | null = null;
-  @State isGridView: boolean = false;
+  @StorageLink('defaultViewIsGrid') isGridView: boolean = false;
   @State tabOptions: SegmentButtonOptions = SegmentButtonOptions.tab({
     buttons: [{ text: '全部' }, { text: '收藏' }] as ItemRestriction<SegmentButtonTextItem>,
     selectedFontColor: $r('sys.color.brand'),
@@ -90,7 +90,7 @@ export struct MdView {
     .padding($r('sys.float.padding_level6'));
   }
 
-  @State sortMode: number = 0;
+  @StorageLink('defaultSortMode') sortMode: number = 0;
   @State menuVisible: boolean = false;
   @State showGroupSheet: boolean = false;
   @State groups: FileGroup[] = [];
@@ -184,15 +184,6 @@ export struct MdView {
 
   aboutToAppear(): void {
     this.registerHarmonyShareListeners();
-    // 读取用户默认设置
-    const savedSort = AppStorage.get<number>('defaultSortMode');
-    if (savedSort !== undefined) {
-      this.sortMode = savedSort;
-    }
-    const savedGrid = AppStorage.get<boolean>('defaultViewIsGrid');
-    if (savedGrid !== undefined) {
-      this.isGridView = savedGrid;
-    }
     setTimeout(() => { this.loadLocalFiles(); }, 0);
   }
 
@@ -477,7 +468,21 @@ export struct MdView {
 
   @Builder
   groupSheetBuilder() {
-    HdsNavDestination() {
+    Column() {
+      Row() {
+        Text('分组')
+          .fontSize(18)
+          .fontWeight(FontWeight.Medium)
+          .fontColor($r('sys.color.font_primary'))
+        Blank()
+        SymbolGlyph($r('sys.symbol.xmark'))
+          .fontSize(20)
+          .fontColor([$r('sys.color.icon_secondary')])
+          .onClick(() => { this.showGroupSheet = false; })
+      }
+      .width('100%')
+      .padding({ left: 20, right: 20, top: 16, bottom: 12 })
+
       GroupSheetContent({
         currentGroupId: this.groupTargetFile ? this.groupTargetFile.groupId : -1,
         groups: this.groups.map((g: FileGroup): GroupItem => {
@@ -489,36 +494,9 @@ export struct MdView {
         onCreate: (name: string) => { this.newGroupName = name; this.createAndAssignGroup(); }
       })
     }
+    .width('100%')
     .backgroundColor($r('sys.color.background_secondary'))
-    .hideBackButton(true)
-    .titleMode(HdsNavDestinationTitleMode.MODAL)
-    .titleBar({
-      style: {
-        scrollEffectOpts: {
-          scrollEffectType: ScrollEffectType.GRADIENT_BLUR,
-        },
-        systemMaterialEffect: {
-          materialType: hdsMaterial.MaterialType.IMMERSIVE,
-          materialLevel: hdsMaterial.MaterialLevel.EXQUISITE
-        },
-      },
-      enableComponentSafeArea: true,
-      content: {
-        title: {
-          mainTitle: '分组',
-        },
-        menu: {
-          value: [{
-            content: {
-              icon: $r('sys.symbol.xmark'),
-              action: () => {
-                this.showGroupSheet = false;
-              },
-            }
-          }]
-        },
-      },
-    })
+    .borderRadius(16)
   }
 
   @Builder
@@ -977,10 +955,12 @@ export struct MdView {
       this.loadLocalFiles();
     })
     .bindSheet(this.showGroupSheet, this.groupSheetBuilder(), {
-      detents: [SheetSize.MEDIUM, SheetSize.LARGE, 200],
-      showClose: false,
-      enableFloatingDragBar: true,
+      height: 400,
+      preferType: SheetType.CENTER,
+      enableOutsideInteractive: false,
       dragBar: false,
+      showClose: false,
+      backgroundColor: $r('sys.color.background_secondary'),
       onDisappear: () => {
         this.showGroupSheet = false;
         this.groupTargetFile = null;

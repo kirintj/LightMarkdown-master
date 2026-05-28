@@ -1,6 +1,4 @@
-import { hdsMaterial, HdsNavDestination,
-  HdsNavDestinationTitleMode,
-  HdsTabs, ScrollEffectType } from '@kit.UIDesignKit';
+import { hdsMaterial, HdsNavDestination, ScrollEffectType } from '@kit.UIDesignKit';
 import { Markdown, MarkdownController } from '@luvi/lv-markdown-in';
 import { MarkdownFile, FileGroup, FileDataSource } from '../class/MarkdownFile';
 import { MdDbService } from '../service/MdDbService';
@@ -9,9 +7,7 @@ import { systemShare, harmonyShare } from '@kit.ShareKit';
 import { uniformTypeDescriptor as utd } from '@kit.ArkData';
 import { fileIo as fs, fileUri } from '@kit.CoreFileKit';
 import { RenameDialog } from '../component/RenameDialog';
-import { GroupSheetContent, GroupItem, showDeleteConfirm, BreakpointType, GlobalInfoModel, StorageKey, PageContext, PageEnum } from 'common';
-import { FileActionBar } from '../component/FileActionBar';
-import { AnimUtil } from 'common';
+import { GroupSheetContent, GroupItem, showDeleteConfirm, BreakpointType, GlobalInfoModel, StorageKey, PageContext, PageEnum, AnimUtil } from 'common';
 
 const TITLE_BAR_HEIGHT_FREE: number = 58 + 16 + 4;
 const DEFAULT_SHARE_DESCRIPTION: string = 'Markdown文档';
@@ -44,11 +40,12 @@ export struct MarkdownViewerPage {
 
   // 分享
   private shareController: systemShare.ShareController | null = null;
+  // 重命名弹窗控制器
+  private renameController: CustomDialogController | null = null;
 
   // 防护标记
   private isShareListenerRegistered: boolean = false;
   private isDestroyed: boolean = false;
-  @StorageProp('safeBottom') safeBottom: number = 0;
   @StorageProp(StorageKey.GLOBAL_INFO) globalInfoModel: GlobalInfoModel =
     AppStorage.get<GlobalInfoModel>(StorageKey.GLOBAL_INFO) ?? new GlobalInfoModel();
 
@@ -283,7 +280,7 @@ export struct MarkdownViewerPage {
   }
 
   private showRenameInputDialog(): void {
-    const controller = new CustomDialogController({
+    this.renameController = new CustomDialogController({
       builder: RenameDialog({
         initialName: this.fileData.name,
         onConfirm: (name: string) => { this.doRenameWith(name); },
@@ -291,7 +288,7 @@ export struct MarkdownViewerPage {
       autoCancel: true,
       alignment: DialogAlignment.Center,
     });
-    controller.open();
+    this.renameController.open();
   }
 
   private async doRenameWith(newName: string): Promise<void> {
@@ -370,18 +367,22 @@ export struct MarkdownViewerPage {
   }
 
   @Builder
-  TabBarBuilder(fileData: MarkdownFile) {
-    FileActionBar({
-      file: fileData,
-      onGroup: () => { this.openGroupSheet(); },
-      onStar: () => { this.toggleStar(); },
-      onDelete: () => { this.showDelete(); }
-    })
-  }
-
-  @Builder
   groupSheetBuilder() {
-    HdsNavDestination() {
+    Column() {
+      Row() {
+        Text('分组')
+          .fontSize(18)
+          .fontWeight(FontWeight.Medium)
+          .fontColor($r('sys.color.font_primary'))
+        Blank()
+        SymbolGlyph($r('sys.symbol.xmark'))
+          .fontSize(20)
+          .fontColor([$r('sys.color.icon_secondary')])
+          .onClick(() => { this.showGroupSheet = false; })
+      }
+      .width('100%')
+      .padding({ left: 20, right: 20, top: 16, bottom: 12 })
+
       GroupSheetContent({
         currentGroupId: this.fileData.groupId,
         groups: this.groups.map((g: FileGroup): GroupItem => {
@@ -393,60 +394,14 @@ export struct MarkdownViewerPage {
         onCreate: (name: string) => { this.newGroupName = name; this.createAndAssignGroup(); }
       })
     }
-    .titleMode(HdsNavDestinationTitleMode.MODAL)
+    .width('100%')
     .backgroundColor($r('sys.color.background_secondary'))
-    .hideBackButton(true)
-    .titleBar({
-      style: {
-        scrollEffectOpts: {
-          scrollEffectType: ScrollEffectType.GRADIENT_BLUR,
-        },
-        systemMaterialEffect: {
-          materialType: hdsMaterial.MaterialType.IMMERSIVE,
-          materialLevel: hdsMaterial.MaterialLevel.EXQUISITE
-        },
-      },
-      enableComponentSafeArea: true,
-      content: {
-        title: {
-          mainTitle: '分组',
-        },
-        menu: {
-          value: [{
-            content: {
-              icon: $r('sys.symbol.xmark'),
-              action: () => {
-                this.showGroupSheet = false;
-              },
-            }
-          }]
-        },
-      },
-    })
+    .borderRadius(16)
   }
 
   build() {
     HdsNavDestination() {
-      HdsTabs() {
-        TabContent() {
-          this.viewingContent();
-        }
-        .tabBar(this.TabBarBuilder(this.fileData))
-      }
-      .barWidth(200)
-      .barFloatingStyle({
-        barBottomMargin: this.safeBottom,
-        systemMaterialEffect: {
-          materialType: hdsMaterial.MaterialType.IMMERSIVE,
-          materialLevel: hdsMaterial.MaterialLevel.EXQUISITE
-        },
-        adaptToHandedness: true,
-      })
-      .barOverlap(true)
-      .barPosition(BarPosition.End)
-      .vertical(false)
-      .scrollable(false)
-      .backgroundColor(Color.Transparent)
+      this.viewingContent();
     }
     .titleBar({
       content: {
@@ -458,7 +413,7 @@ export struct MarkdownViewerPage {
             {
               content: {
                 label: '重命名',
-                icon: $r('sys.symbol.doc_plaintext_fill'),
+                icon: $r('sys.symbol.rename'),
                 action: () => { this.showRenameInputDialog(); }
               }
             },
@@ -483,9 +438,12 @@ export struct MarkdownViewerPage {
       avoidLayoutSafeArea: true
     })
     .bindSheet($$this.showGroupSheet, this.groupSheetBuilder(), {
-      height: SheetSize.MEDIUM,
+      height: 400,
+      preferType: SheetType.CENTER,
+      enableOutsideInteractive: false,
+      dragBar: false,
       showClose: false,
-      enableFloatingDragBar: true,
+      backgroundColor: $r('sys.color.background_secondary'),
     });
   }
 }

@@ -28,8 +28,8 @@ export struct Mine {
   @State totalCount: number = 0;
   @State groupCount: number = 0;
   @State storageUsed: string = '计算中...';
-  @State sortMode: number = 0;
-  @State defaultViewIsGrid: boolean = false;
+  @StorageLink('defaultSortMode') sortMode: number = 0;
+  @StorageLink('defaultViewIsGrid') defaultViewIsGrid: boolean = false;
   @State isLogin: boolean = false;
   @State avatarUrl: string = '';
   @State nickName: string = '';
@@ -41,8 +41,6 @@ export struct Mine {
 
   async aboutToAppear(): Promise<void> {
     await this.loadStats();
-    this.sortMode = AppStorage.get<number>('defaultSortMode') ?? 0;
-    this.defaultViewIsGrid = AppStorage.get<boolean>('defaultViewIsGrid') ?? false;
 
     // 监听登录事件
     emitter.on(AccountEvent.BIND_MINE_LOGIN_EVENT, () => {
@@ -99,12 +97,10 @@ export struct Mine {
 
   private saveDefaultSort(mode: number): void {
     this.sortMode = mode;
-    AppStorage.setOrCreate<number>('defaultSortMode', mode);
   }
 
   private saveDefaultView(isGrid: boolean): void {
     this.defaultViewIsGrid = isGrid;
-    AppStorage.setOrCreate<boolean>('defaultViewIsGrid', isGrid);
   }
 
   updateAccountData() {
@@ -196,6 +192,8 @@ export struct Mine {
                     height: 200,
                     preferType: SheetType.CENTER,
                     enableOutsideInteractive: false,
+                    dragBar: false,
+                    showClose: false,
                   })
                   .onClick(() => {
                     if (!this.isLogin) {
@@ -399,12 +397,17 @@ export struct Mine {
     })
     .bindSheet($$this.isShowAccountInfo, this.AccountSheetBuilder, {
       height: 200,
-      dragBar: true,
+      preferType: SheetType.CENTER,
+      enableOutsideInteractive: false,
+      dragBar: false,
+      showClose: false,
     })
     .bindSheet($$this.showConfirmLoginDialog, this.ConfirmLoginSheetBuilder, {
       height: 280,
       preferType: SheetType.CENTER,
       enableOutsideInteractive: false,
+      dragBar: false,
+      showClose: false,
     })
   }
 

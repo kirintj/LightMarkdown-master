@@ -1,8 +1,8 @@
-import { MarkdownFile } from '../class/MarkdownFile';
-
 @Component
 export struct FileActionBar {
-  file: MarkdownFile = new MarkdownFile('', '', '', 0);
+  @Prop isStar: boolean = false;
+  @Prop groupId: number = -1;
+  @Prop groupName: string = '';
   onGroup: () => void = () => {};
   onStar: () => void = () => {};
   onDelete: () => void = () => {};
@@ -27,14 +27,14 @@ export struct FileActionBar {
     Row() {
       this.actionButton(
         $r('sys.symbol.folder_fill'),
-        this.file.groupId !== -1 ? this.file.groupName : '分组',
-        this.file.groupId !== -1 ? $r('sys.color.confirm') : $r('sys.color.icon_primary'),
+        this.groupId !== -1 ? this.groupName : '分组',
+        this.groupId !== -1 ? $r('sys.color.confirm') : $r('sys.color.icon_primary'),
         () => { this.onGroup(); }
       )
       this.actionButton(
         $r('sys.symbol.star_fill'),
-        this.file.isStar ? '取消收藏' : '收藏',
-        this.file.isStar ? '#FFC83D' : $r('sys.color.icon_primary'),
+        this.isStar ? '取消收藏' : '收藏',
+        this.isStar ? '#FFC83D' : $r('sys.color.icon_primary'),
         () => { this.onStar(); }
       )
       this.actionButton(

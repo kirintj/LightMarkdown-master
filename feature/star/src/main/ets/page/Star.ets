@@ -241,6 +241,7 @@ export struct Star {
       .fontColor($r('sys.color.font_secondary'))
       .width('100%')
       .margin({ top: 20, bottom: 12 })
+      .padding({left: 8})
   }
 
   @Builder
@@ -430,11 +431,11 @@ export struct Star {
     })
     .bindSheet(this.showCreateGroupSheet, this.createGroupSheetBuilder(), {
       height: 480,
-      blurStyle: BlurStyle.Thick,
-      title: {
-        title: '新建分组',
-      },
-      backgroundColor: $r('sys.color.comp_background_primary'),
+      preferType: SheetType.CENTER,
+      enableOutsideInteractive: false,
+      dragBar: false,
+      showClose: false,
+      backgroundColor: $r('sys.color.background_secondary'),
       onAppear: () => {
         setTimeout(() => {
           try {
