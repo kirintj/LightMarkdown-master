@@ -161,7 +161,7 @@ export class AccountService {
           }
         });
       })
-      .catch((err) => {
+      .catch((err: BusinessError) => {
         console.error(TAG, `Create subscriber failed: ${err.code} ${err.message}`);
       });
   }
@@ -177,6 +177,8 @@ export class AccountService {
 
   private updatePreference(userLogin: boolean, userAccount?: UserAccount) {
     this.preferenceManager.setValue(AccountServiceConstants.USER_LOGIN, userLogin);
-    this.preferenceManager.setValue(AccountServiceConstants.USER_ACCOUNT, userAccount);
+    if (userAccount) {
+      this.preferenceManager.setValue(AccountServiceConstants.USER_ACCOUNT, userAccount);
+    }
   }
 }

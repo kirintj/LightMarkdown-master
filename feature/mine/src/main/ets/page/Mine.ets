@@ -118,7 +118,7 @@ export struct Mine {
         this.nickName = userAccount.nickname;
         AccountService.getInstance().selectHuaweiAccountToLogin();
       })
-      .catch((error) => {
+      .catch((error: Error) => {
         console.error('[Mine] Login failed:', JSON.stringify(error));
       });
   }

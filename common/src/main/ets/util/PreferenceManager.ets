@@ -30,8 +30,8 @@ export class PreferenceManager {
       return undefined;
     }
     try {
-      return this.dataPreferences.getSync(key);
-    } catch (err) {
+      return this.dataPreferences.getSync(key, undefined);
+    } catch (err: object) {
       console.error(TAG, `Get value failed for key ${key}: ${JSON.stringify(err)}`);
       return undefined;
     }
