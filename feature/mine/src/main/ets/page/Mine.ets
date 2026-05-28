@@ -124,11 +124,12 @@ export struct Mine {
         this.avatarUrl = userAccount.avatarUrl;
         this.nickName = userAccount.nickname;
       })
-      .catch((error: Error) => {
+      .catch((error) => {
         console.error('[Mine] Login failed:', JSON.stringify(error));
-        if (error.message?.includes('1001500001')) {
+        const errorCode = error.code ?? 0;
+        if (errorCode === 1001500001) {
           promptAction.showToast({ message: '用户取消登录' });
-        } else if (error.message?.includes('1001500002')) {
+        } else if (errorCode === 1001500002) {
           promptAction.showToast({ message: '网络连接失败' });
         } else {
           promptAction.showToast({ message: '登录失败，请重试' });
