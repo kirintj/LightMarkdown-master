@@ -7,6 +7,7 @@ import { MdDbService, FileDataSource, MarkdownFile } from 'markdown';
 import { common } from '@kit.AbilityKit';
 import { fileIo as fs } from '@kit.CoreFileKit';
 import { emitter } from '@kit.BasicServicesKit';
+import { promptAction } from '@kit.ArkUI';
 
 const TITLE_BAR_HEIGHT_FREE: number = 56;
 
@@ -125,10 +126,13 @@ export struct Mine {
       })
       .catch((error: Error) => {
         console.error('[Mine] Login failed:', JSON.stringify(error));
-        // TODO: 根据 error.code 展示不同提示
-        // 1001500001 - 用户取消登录
-        // 1001500002 - 网络连接失败
-        // 其他 - 登录失败，请重试
+        if (error.message?.includes('1001500001')) {
+          promptAction.showToast({ message: '用户取消登录' });
+        } else if (error.message?.includes('1001500002')) {
+          promptAction.showToast({ message: '网络连接失败' });
+        } else {
+          promptAction.showToast({ message: '登录失败，请重试' });
+        }
       });
   }
 
