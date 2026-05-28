@@ -60,9 +60,6 @@ export class AccountService {
           this.userAccount.avatarUrl = authCredential.avatarUri ?? '';
           this.userAccount.nickname = authCredential.nickName ?? '';
           this.userAccount.unionId = authCredential.unionID ?? '';
-          this.userLogin = true;
-          this.updatePreference(this.userLogin, this.userAccount);
-          emitter.emit(AccountEvent.BIND_MINE_LOGIN_EVENT);
           resolve(this.userAccount);
         })
         .catch((error: BusinessError) => {
@@ -70,6 +67,12 @@ export class AccountService {
           reject(error);
         });
     });
+  }
+
+  public confirmLogin(): void {
+    this.userLogin = true;
+    this.updatePreference(this.userLogin, this.userAccount);
+    emitter.emit(AccountEvent.BIND_MINE_LOGIN_EVENT);
   }
 
   private getAuthCredential(uiContext: UIContext): Promise<authentication.AuthorizationWithHuaweiIDCredential> {

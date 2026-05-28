@@ -34,6 +34,9 @@ export struct Mine {
   @State avatarUrl: string = '';
   @State nickName: string = '';
   @State isShowAccountInfo: boolean = false;
+  @State showConfirmLoginDialog: boolean = false;
+  @State tempAvatarUrl: string = '';
+  @State tempNickName: string = '';
   private context = this.getUIContext().getHostContext() as common.UIAbilityContext;
 
   async aboutToAppear(): Promise<void> {
@@ -121,8 +124,9 @@ export struct Mine {
     const uiContext = this.getUIContext();
     AccountService.getInstance().login(uiContext)
       .then((userAccount) => {
-        this.avatarUrl = userAccount.avatarUrl;
-        this.nickName = userAccount.nickname;
+        this.tempAvatarUrl = userAccount.avatarUrl;
+        this.tempNickName = userAccount.nickname;
+        this.showConfirmLoginDialog = true;
       })
       .catch((error) => {
         console.error('[Mine] Login failed:', JSON.stringify(error));
@@ -135,6 +139,11 @@ export struct Mine {
           promptAction.showToast({ message: '登录失败，请重试' });
         }
       });
+  }
+
+  handleConfirmLogin() {
+    AccountService.getInstance().confirmLogin();
+    this.showConfirmLoginDialog = false;
   }
 
   build() {
@@ -403,6 +412,11 @@ export struct Mine {
       height: 200,
       dragBar: true,
     })
+    .bindSheet($$this.showConfirmLoginDialog, this.ConfirmLoginSheetBuilder, {
+      height: 280,
+      preferType: SheetType.CENTER,
+      enableOutsideInteractive: false,
+    })
   }
 
   @Builder
@@ -455,6 +469,79 @@ export struct Mine {
         .onClick(() => {
           AccountService.getInstance().logoutDirect();
           this.isShowAccountInfo = false;
+        })
+    }
+    .width('100%')
+    .height('100%')
+    .alignItems(HorizontalAlign.Center)
+  }
+
+  @Builder
+  ConfirmLoginSheetBuilder() {
+    Column() {
+      Text('确认登录')
+        .fontSize(18)
+        .fontWeight(FontWeight.Medium)
+        .fontColor($r('sys.color.font_primary'))
+        .margin({ top: 20 })
+
+      // 头像
+      if (this.tempAvatarUrl) {
+        Image(this.tempAvatarUrl)
+          .draggable(false)
+          .width(64)
+          .height(64)
+          .borderRadius(32)
+          .margin({ top: 16 })
+      } else {
+        Text(this.tempNickName.slice(-1))
+          .width(64)
+          .height(64)
+          .borderRadius(32)
+          .backgroundColor($r('sys.color.ohos_id_color_tertiary'))
+          .linearGradient({
+            colors: [
+              [$r('sys.color.ohos_id_color_tertiary'), 0.0],
+              [$r('sys.color.ohos_id_color_foreground_contrary'), 1.0],
+            ],
+          })
+          .fontColor($r('sys.color.font_on_primary'))
+          .fontSize(24)
+          .fontWeight(FontWeight.Bold)
+          .textAlign(TextAlign.Center)
+          .margin({ top: 16 })
+      }
+
+      // 昵称
+      Text(this.tempNickName)
+        .fontSize(16)
+        .fontColor($r('sys.color.font_primary'))
+        .margin({ top: 12 })
+
+      Blank()
+
+      // 确认登录按钮
+      Button('确认登录')
+        .type(ButtonType.Capsule)
+        .width('90%')
+        .height(44)
+        .backgroundColor($r('sys.color.brand'))
+        .fontColor(Color.White)
+        .margin({ bottom: 12 })
+        .onClick(() => {
+          this.handleConfirmLogin();
+        })
+
+      // 取消按钮
+      Button('取消')
+        .type(ButtonType.Capsule)
+        .width('90%')
+        .height(44)
+        .backgroundColor($r('sys.color.comp_background_tertiary'))
+        .fontColor($r('sys.color.font_primary'))
+        .margin({ bottom: 20 })
+        .onClick(() => {
+          this.showConfirmLoginDialog = false;
         })
     }
     .width('100%')
