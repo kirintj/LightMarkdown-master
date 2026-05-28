@@ -1,21 +1,34 @@
-import { Configuration, ConfigurationConstant, UIAbility } from '@kit.AbilityKit';
+import { Configuration, ConfigurationConstant, UIAbility, Want } from '@kit.AbilityKit';
 import { hilog } from '@kit.PerformanceAnalysisKit';
 import { AppStorageV2, window } from '@kit.ArkUI';
-import { WindowUtil, GlobalInfoModel, StorageKey } from 'common';
+import { WindowUtil, GlobalInfoModel, StorageKey, PageContext } from 'common';
+import { AccountService } from 'common';
+import { PreferenceManager } from 'common/src/main/ets/util/PreferenceManager';
 
 const DOMAIN = 0x0000;
 
 export default class EntryAbility extends UIAbility {
 
-  onCreate(): void {
+  onCreate(want: Want): void {
     try {
       this.context.getApplicationContext().setColorMode(ConfigurationConstant.ColorMode.COLOR_MODE_NOT_SET);
     } catch (err) {
       hilog.error(DOMAIN, 'testTag', 'Failed to set colorMode. Cause: %{public}s', JSON.stringify(err));
     }
     AppStorage.setOrCreate<ConfigurationConstant.ColorMode>('currentColorMode', this.context.config.colorMode);
+    this.handleWantParam(want);
 
     hilog.info(DOMAIN, 'testTag', '%{public}s', 'Ability onCreate');
+  }
+
+  onNewWant(want: Want): void {
+    this.handleWantParam(want);
+  }
+
+  private handleWantParam(want: Want): void {
+    if (want.parameters) {
+      AppStorage.setOrCreate(StorageKey.WANT_PARAMETERS, want.parameters);
+    }
   }
 
   onDestroy(): void {
@@ -48,12 +61,21 @@ export default class EntryAbility extends UIAbility {
       });
     } catch (error) {
     }
-    // 1. 开启窗口全屏沉浸式
-    windowStage.loadContent('pages/Index', (err) => {
+
+    // 创建统一导航栈
+    AppStorage.setOrCreate(StorageKey.HOME_PAGE_CONTEXT, new PageContext());
+
+    // 加载首页
+    windowStage.loadContent('pages/SplashPage', (err) => {
       if (err.code) {
         hilog.error(DOMAIN, 'testTag', 'Failed to load the content. Cause: %{public}s', JSON.stringify(err));
         return;
       }
+      // 初始化 PreferenceManager
+      PreferenceManager.getInstance().init(this.context).then(() => {
+        // 初始化账号服务
+        AccountService.getInstance().init();
+      });
       // 初始化窗口工具（含断点监听）
       WindowUtil.initialize(windowStage);
       hilog.info(DOMAIN, 'testTag', 'Succeeded in loading the content.');
