@@ -11,6 +11,7 @@ import { fileIo as fs, fileUri } from '@kit.CoreFileKit';
 import { RenameDialog } from '../component/RenameDialog';
 import { GroupSheetContent, GroupItem, showDeleteConfirm, BreakpointType, GlobalInfoModel, StorageKey, PageContext, PageEnum } from 'common';
 import { FileActionBar } from '../component/FileActionBar';
+import { AnimUtil } from 'common';
 
 const TITLE_BAR_HEIGHT_FREE: number = 58 + 16 + 4;
 const DEFAULT_SHARE_DESCRIPTION: string = 'Markdown文档';
@@ -353,7 +354,7 @@ export struct MarkdownViewerPage {
               controller: this.controller
             })
               .width('100%')
-              .transition(TransitionEffect.OPACITY.animation({ duration: 300 }))
+              .transition(AnimUtil.fadeInTransition())
           }
         }
       }.padding(new BreakpointType<Padding>({

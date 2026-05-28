@@ -1,5 +1,5 @@
 import { MarkdownFile } from '../class/MarkdownFile';
-import { formatRelativeTime } from 'common';
+import { formatRelativeTime, AnimUtil, SpringCurve, AnimDuration, ScaleValue } from 'common';
 import { hdsEffect } from '@kit.UIDesignKit';
 
 @Component
@@ -8,6 +8,7 @@ export struct FileGridCard {
   onTap: () => void = () => {};
   onStar: () => void = () => {};
   controller: hdsEffect.ShaderEffectController = new hdsEffect.ShaderEffectController();
+  @State animScale: number = 1;
 
   build() {
     Stack({ alignContent: Alignment.TopEnd }) {
@@ -55,18 +56,6 @@ export struct FileGridCard {
           }
         }
         .margin({ top: 4 })
-
-        Row() {
-          Blank()
-          if (this.file.isStar) {
-            SymbolGlyph($r('sys.symbol.star_fill'))
-              .fontSize(14)
-              .fontColor(['#FFC83D'])
-              .onClick(() => { this.onStar(); });
-          }
-        }
-        .width('100%')
-        .margin({ top: 4 })
       }
       .width('100%')
       .height(undefined)
@@ -90,6 +79,15 @@ export struct FileGridCard {
       .buildEffect())
     .borderRadius(16)
     .width('100%')
+    .scale({ x: this.animScale, y: this.animScale })
+    .animation({ duration: AnimDuration.MEDIUM, curve: SpringCurve.CARD })
     .onClick(() => { this.onTap(); })
+    .onTouch((event: TouchEvent) => {
+      if (event.type === TouchType.Down) {
+        AnimUtil.spring(this.getUIContext(), () => { this.animScale = ScaleValue.CARD_PRESS; });
+      } else if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
+        AnimUtil.spring(this.getUIContext(), () => { this.animScale = 1; });
+      }
+    })
   }
 }

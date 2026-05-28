@@ -1,3 +1,5 @@
+import { AnimUtil } from '../util/AnimationUtil';
+
 @Component
 export struct EmptyState {
   icon: Resource = $r('sys.symbol.doc_plaintext_fill');
@@ -17,5 +19,6 @@ export struct EmptyState {
     .padding({ top: 80 })
     .justifyContent(FlexAlign.Center)
     .alignItems(HorizontalAlign.Center)
+    .transition(AnimUtil.fadeInTransition())
   }
 }

@@ -1,3 +1,5 @@
+import { AnimUtil, SpringCurve, AnimDuration, ScaleValue } from '../util/AnimationUtil';
+
 @Component
 export struct CardItem {
   @Prop isShow: boolean;
@@ -5,6 +7,7 @@ export struct CardItem {
   symbolSrc?: Resource;
   onclick: Function = () => {
   };
+  @State animScale: number = 1;
 
   build() {
     Row() {
@@ -23,8 +26,17 @@ export struct CardItem {
     }
     .width('100%')
     .height(56)
+    .scale({ x: this.animScale, y: this.animScale })
+    .animation({ duration: AnimDuration.MEDIUM, curve: SpringCurve.CARD })
     .onClick(() => {
       this.onclick();
+    })
+    .onTouch((event: TouchEvent) => {
+      if (event.type === TouchType.Down) {
+        AnimUtil.spring(this.getUIContext(), () => { this.animScale = ScaleValue.CARD_PRESS; });
+      } else if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
+        AnimUtil.spring(this.getUIContext(), () => { this.animScale = 1; });
+      }
     })
   }
 }

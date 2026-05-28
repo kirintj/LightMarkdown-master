@@ -1,7 +1,8 @@
 import { HdsAnimationMode, hdsMaterial, HdsNavDestination, HdsTabs, HdsTabsController,  } from '@kit.UIDesignKit';
 import { SymbolGlyphModifier, window } from '@kit.ArkUI';
-import { ConfigurationConstant } from '@kit.AbilityKit';
-import { MdView, FileDataSource } from 'markdown';
+import { ConfigurationConstant, common } from '@kit.AbilityKit';
+import { picker, fileIo as fs } from '@kit.CoreFileKit';
+import { MdView, FileDataSource, MarkdownFile, MdDbService } from 'markdown';
 import { Star } from 'star';
 import { Mine } from 'mine';
 import { PageContext, PageEnum, StorageKey, GlobalInfoModel, BreakpointType, TabBarType, TABS_LIST, HdsUtil } from 'common';
@@ -52,6 +53,57 @@ export struct MainPage {
 
   onDataVersionChange(): void {
     AppStorage.setOrCreate<number>('dataVersion', this.dataVersion);
+  }
+
+  private async importFile(): Promise<void> {
+    try {
+      const pickerOpt = new picker.DocumentSelectOptions();
+      pickerOpt.maxSelectNumber = 50;
+      pickerOpt.fileSuffixFilters = ['.md', 'application/markdown', 'text/markdown', 'text/x-markdown'];
+
+      const documentViewPicker = new picker.DocumentViewPicker();
+      const uris = await documentViewPicker.select(pickerOpt);
+
+      if (!uris || uris.length === 0) return;
+
+      const context = this.getUIContext().getHostContext() as common.UIAbilityContext;
+      const targetDir = context.filesDir + '/md_docs';
+      if (!fs.accessSync(targetDir)) fs.mkdirSync(targetDir);
+
+      const dbService = MdDbService.getInstance(context);
+      await dbService.init();
+      const newFiles: MarkdownFile[] = [];
+
+      for (const sourceUri of uris) {
+        try {
+          const srcFile = fs.openSync(sourceUri, fs.OpenMode.READ_ONLY);
+          if (!srcFile || !srcFile.name) {
+            fs.closeSync(srcFile);
+            continue;
+          }
+
+          const targetPath = `${targetDir}/${srcFile.name}`;
+          const destFile = fs.openSync(targetPath, fs.OpenMode.READ_WRITE | fs.OpenMode.CREATE);
+          fs.copyFileSync(srcFile.fd, destFile.fd);
+
+          const stats = fs.statSync(targetPath);
+          const mdFile = new MarkdownFile(srcFile.name, sourceUri, targetPath, stats.size, false, undefined, -1, '', 0, Date.now());
+          this.dataSource.pushItem(mdFile);
+          newFiles.push(mdFile);
+
+          fs.closeSync(srcFile);
+          fs.closeSync(destFile);
+        } catch (err) {
+          console.error('单个文件处理失败:', JSON.stringify(err));
+        }
+      }
+
+      await dbService.insertFiles(newFiles);
+      this.dataVersion++;
+      AppStorage.setOrCreate<number>('dataVersion', this.dataVersion);
+    } catch (err) {
+      console.error('导入失败: ' + JSON.stringify(err));
+    }
   }
 
   bottomTabBarStyle(tabType: TabBarType): BottomTabBarStyle {
@@ -117,15 +169,8 @@ export struct MainPage {
         adaptToHandedness: true
       })
       .barOverlap(true)
-      .barPosition(this.globalInfoModel.widthBreakpoint === WidthBreakpoint.WIDTH_LG ?
-        BarPosition.Start : BarPosition.End)
-      .vertical(this.globalInfoModel.widthBreakpoint === WidthBreakpoint.WIDTH_LG)
-      .barHeight(new BreakpointType<Length>({
-        sm: 56,
-        md: 56,
-        lg: '100%',
-        xl: 0,
-      }).getValue(this.globalInfoModel.widthBreakpoint))
+      .vertical(false)
+      .barPosition(BarPosition.End)
       .scrollable(false)
       .backgroundColor(Color.Transparent)
       .animationDuration(0)
@@ -146,7 +191,7 @@ export struct MainPage {
       .width(56).height(56).justifyContent(FlexAlign.Center)
     }
     .onClick(() => {
-      this.pageContext.openPage({ routerName: PageEnum.MULTI_SELECT_PAGE });
+      this.importFile();
     })
   }
 }

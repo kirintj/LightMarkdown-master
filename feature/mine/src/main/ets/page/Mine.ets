@@ -128,17 +128,6 @@ export struct Mine {
         this.tempNickName = userAccount.nickname;
         this.showConfirmLoginDialog = true;
       })
-      .catch((error) => {
-        console.error('[Mine] Login failed:', JSON.stringify(error));
-        const errorCode = error.code ?? 0;
-        if (errorCode === 1001500001) {
-          promptAction.showToast({ message: '用户取消登录' });
-        } else if (errorCode === 1001500002) {
-          promptAction.showToast({ message: '网络连接失败' });
-        } else {
-          promptAction.showToast({ message: '登录失败，请重试' });
-        }
-      });
   }
 
   handleConfirmLogin() {

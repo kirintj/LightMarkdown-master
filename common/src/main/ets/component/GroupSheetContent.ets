@@ -1,3 +1,5 @@
+import { AnimUtil, SpringCurve, AnimDuration } from '../util/AnimationUtil';
+
 export interface GroupItem {
   id: number;
   name: string;
@@ -57,6 +59,7 @@ export struct GroupSheetContent {
               .width('100%')
               .padding({ left: 16, right: 16, top: 12, bottom: 12 })
               .borderRadius(16)
+              .transition(AnimUtil.slideUpTransition())
               .onClick(() => { this.onAssign(group.id, group.name); });
             }
           }, (group: GroupItem) => group.id.toString());

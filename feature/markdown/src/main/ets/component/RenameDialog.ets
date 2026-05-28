@@ -1,3 +1,5 @@
+import { AnimUtil } from 'common';
+
 @CustomDialog
 @Component
 export struct RenameDialog {
@@ -42,5 +44,6 @@ export struct RenameDialog {
     }
     .padding(16)
     .width('100%')
+    .transition(AnimUtil.scaleFadeTransition())
   }
 }

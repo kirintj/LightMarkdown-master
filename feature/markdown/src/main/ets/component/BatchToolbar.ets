@@ -1,3 +1,5 @@
+import { AnimUtil } from 'common';
+
 @Component
 export struct BatchToolbar {
   selectedCount: number = 0;
@@ -31,5 +33,6 @@ export struct BatchToolbar {
     }
     .justifyContent(FlexAlign.SpaceAround)
     .width('100%')
+    .transition(AnimUtil.slideUpTransition())
   }
 }

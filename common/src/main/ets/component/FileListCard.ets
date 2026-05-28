@@ -1,3 +1,5 @@
+import { AnimUtil, SpringCurve, AnimDuration, ScaleValue } from '../util/AnimationUtil';
+
 @Component
 export struct FileListCard {
   name: string = '';
@@ -7,6 +9,7 @@ export struct FileListCard {
   groupName: string = '';
   onTap: () => void = () => {};
   onStar: () => void = () => {};
+  @State animScale: number = 1;
 
   build() {
     Row() {
@@ -43,6 +46,15 @@ export struct FileListCard {
         .onClick(() => { this.onStar(); });
     }
     .width('100%')
-    .onClick(() => { this.onTap(); });
+    .scale({ x: this.animScale, y: this.animScale })
+    .animation({ duration: AnimDuration.MEDIUM, curve: SpringCurve.CARD })
+    .onClick(() => { this.onTap(); })
+    .onTouch((event: TouchEvent) => {
+      if (event.type === TouchType.Down) {
+        AnimUtil.spring(this.getUIContext(), () => { this.animScale = ScaleValue.CARD_PRESS; });
+      } else if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
+        AnimUtil.spring(this.getUIContext(), () => { this.animScale = 1; });
+      }
+    });
   }
 }
